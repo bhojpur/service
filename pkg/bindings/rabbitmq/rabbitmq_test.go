@@ -1,0 +1,199 @@
+package rabbitmq
+
+// Copyright (c) 2018 Bhojpur Consulting Private Limited, India. All rights reserved.
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+import (
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/bhojpur/service/pkg/bindings"
+	"github.com/bhojpur/service/pkg/metadata"
+	"github.com/bhojpur/service/pkg/utils/logger"
+)
+
+func TestParseMetadata(t *testing.T) {
+	const queueName = "test-queue"
+	const host = "test-host"
+	var oneSecondTTL time.Duration = time.Second
+
+	testCases := []struct {
+		name                     string
+		properties               map[string]string
+		expectedDeleteWhenUnused bool
+		expectedDurable          bool
+		expectedExclusive        bool
+		expectedTTL              *time.Duration
+		expectedPrefetchCount    int
+		expectedMaxPriority      *uint8
+	}{
+		{
+			name:                     "Delete / Durable",
+			properties:               map[string]string{"queueName": queueName, "host": host, "deleteWhenUnused": "true", "durable": "true"},
+			expectedDeleteWhenUnused: true,
+			expectedDurable:          true,
+		},
+		{
+			name:                     "Not Delete / Not durable",
+			properties:               map[string]string{"queueName": queueName, "host": host, "deleteWhenUnused": "false", "durable": "false"},
+			expectedDeleteWhenUnused: false,
+			expectedDurable:          false,
+		},
+		{
+			name:                     "With one second TTL",
+			properties:               map[string]string{"queueName": queueName, "host": host, "deleteWhenUnused": "false", "durable": "false", metadata.TTLMetadataKey: "1"},
+			expectedDeleteWhenUnused: false,
+			expectedDurable:          false,
+			expectedTTL:              &oneSecondTTL,
+		},
+		{
+			name:                     "Empty TTL",
+			properties:               map[string]string{"queueName": queueName, "host": host, "deleteWhenUnused": "false", "durable": "false", metadata.TTLMetadataKey: ""},
+			expectedDeleteWhenUnused: false,
+			expectedDurable:          false,
+		},
+		{
+			name:                     "With one prefetchCount",
+			properties:               map[string]string{"queueName": queueName, "host": host, "deleteWhenUnused": "false", "durable": "false", "prefetchCount": "1"},
+			expectedDeleteWhenUnused: false,
+			expectedDurable:          false,
+			expectedPrefetchCount:    1,
+		},
+		{
+			name:                     "Exclusive Queue",
+			properties:               map[string]string{"queueName": queueName, "host": host, "deleteWhenUnused": "false", "durable": "false", "exclusive": "true"},
+			expectedDeleteWhenUnused: false,
+			expectedDurable:          false,
+			expectedExclusive:        true,
+		},
+		{
+			name:                     "With maxPriority",
+			properties:               map[string]string{"queueName": queueName, "host": host, "deleteWhenUnused": "false", "durable": "false", "maxPriority": "1"},
+			expectedDeleteWhenUnused: false,
+			expectedDurable:          false,
+			expectedMaxPriority: func() *uint8 {
+				v := uint8(1)
+
+				return &v
+			}(),
+		},
+		{
+			name:                     "With maxPriority(> 255)",
+			properties:               map[string]string{"queueName": queueName, "host": host, "deleteWhenUnused": "false", "durable": "false", "maxPriority": "256"},
+			expectedDeleteWhenUnused: false,
+			expectedDurable:          false,
+			expectedMaxPriority: func() *uint8 {
+				v := uint8(255)
+
+				return &v
+			}(),
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			m := bindings.Metadata{}
+			m.Properties = tt.properties
+			r := RabbitMQ{logger: logger.NewLogger("test")}
+			err := r.parseMetadata(m)
+			assert.Nil(t, err)
+			assert.Equal(t, queueName, r.metadata.QueueName)
+			assert.Equal(t, host, r.metadata.Host)
+			assert.Equal(t, tt.expectedDeleteWhenUnused, r.metadata.DeleteWhenUnused)
+			assert.Equal(t, tt.expectedDurable, r.metadata.Durable)
+			assert.Equal(t, tt.expectedTTL, r.metadata.defaultQueueTTL)
+			assert.Equal(t, tt.expectedPrefetchCount, r.metadata.PrefetchCount)
+			assert.Equal(t, tt.expectedExclusive, r.metadata.Exclusive)
+			assert.Equal(t, tt.expectedMaxPriority, r.metadata.MaxPriority)
+		})
+	}
+}
+
+func TestParseMetadataWithInvalidTTL(t *testing.T) {
+	const queueName = "test-queue"
+	const host = "test-host"
+
+	testCases := []struct {
+		name       string
+		properties map[string]string
+	}{
+		{
+			name:       "Whitespaces TTL",
+			properties: map[string]string{"queueName": queueName, "host": host, metadata.TTLMetadataKey: "  "},
+		},
+		{
+			name:       "Negative ttl",
+			properties: map[string]string{"queueName": queueName, "host": host, metadata.TTLMetadataKey: "-1"},
+		},
+		{
+			name:       "Non-numeric ttl",
+			properties: map[string]string{"queueName": queueName, "host": host, metadata.TTLMetadataKey: "abc"},
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			m := bindings.Metadata{}
+			m.Properties = tt.properties
+			r := RabbitMQ{logger: logger.NewLogger("test")}
+			err := r.parseMetadata(m)
+			assert.NotNil(t, err)
+		})
+	}
+}
+
+func TestParseMetadataWithInvalidMaxPriority(t *testing.T) {
+	const queueName = "test-queue"
+	const host = "test-host"
+
+	testCases := []struct {
+		name       string
+		properties map[string]string
+	}{
+		{
+			name:       "Whitespaces maxPriority",
+			properties: map[string]string{"queueName": queueName, "host": host, "maxPriority": "  "},
+		},
+		{
+			name:       "Negative maxPriority",
+			properties: map[string]string{"queueName": queueName, "host": host, "maxPriority": "-1"},
+		},
+		{
+			name:       "Non-numeric maxPriority",
+			properties: map[string]string{"queueName": queueName, "host": host, "maxPriority": "abc"},
+		},
+		{
+			name:       "Negative maxPriority",
+			properties: map[string]string{"queueName": queueName, "host": host, "maxPriority": "-1"},
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			m := bindings.Metadata{}
+			m.Properties = tt.properties
+			r := RabbitMQ{logger: logger.NewLogger("test")}
+			err := r.parseMetadata(m)
+			assert.NotNil(t, err)
+		})
+	}
+}
