@@ -596,7 +596,7 @@ func updatePasswordAuthInfo(config *sarama.Config, saslUsername, saslPassword st
 	config.Net.SASL.Enable = true
 	config.Net.SASL.User = saslUsername
 	config.Net.SASL.Password = saslPassword
-	config.Net.SASL.Mechanism = sarama.SASLTypePlaintext
+	//config.Net.SASL.Mechanism = sarama.SASLTypePlaintext
 }
 
 func updateMTLSAuthInfo(config *sarama.Config, metadata *kafkaMetadata) error {
@@ -647,8 +647,8 @@ func updateOidcAuthInfo(config *sarama.Config, metadata *kafkaMetadata) error {
 	tokenProvider.skipCaVerify = metadata.TLSSkipVerify
 
 	config.Net.SASL.Enable = true
-	config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
-	config.Net.SASL.TokenProvider = &tokenProvider
+	//config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
+	//config.Net.SASL.TokenProvider = &tokenProvider
 
 	return nil
 }

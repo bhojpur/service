@@ -49,7 +49,7 @@ const (
 // CosmosDBGremlinAPI allows performing state operations on collections.
 type CosmosDBGremlinAPI struct {
 	metadata *cosmosDBGremlinAPICredentials
-	client   *gremcos.Cosmos
+	client   gremcos.Cosmos
 	logger   logger.Logger
 }
 

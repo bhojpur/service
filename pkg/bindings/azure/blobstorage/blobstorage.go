@@ -42,8 +42,8 @@ const (
 	// Used to reference the blob relative to the container.
 	metadataKeyBlobName = "blobName"
 	// A string value that identifies the portion of the list to be returned with the next list operation.
-	// The operation returns a marker value within the response body if the list returned was not complete. The marker
-	// value may then be used in a subsequent call to request the next set of list items.
+	// The operation returns a marker value within the response body if the list returned was not complete.
+	// The marker value may then be used in a subsequent call to request the next set of list items.
 	// See: https://docs.microsoft.com/en-us/rest/api/storageservices/list-blobs#uri-parameters
 	metadataKeyMarker = "marker"
 	// The number of blobs that will be returned in a list operation.
@@ -176,7 +176,7 @@ func (a *AzureBlobStorage) parseMetadata(metadata bindings.Metadata) (*blobStora
 		m.GetBlobRetryCount = defaultGetBlobRetryCount
 	}
 
-	// per the Bhojpur Application documentation "none" is a valid value
+	// According to the Bhojpur Application documentation "none" is a valid value
 	if m.PublicAccessLevel == "none" {
 		m.PublicAccessLevel = ""
 	}
@@ -381,7 +381,7 @@ func (a *AzureBlobStorage) list(req *bindings.InvokeRequest) (*bindings.InvokeRe
 		initialMarker = azblob.Marker{}
 	}
 
-	var blobs []azblob.BlobItem
+	var blobs []azblob.BlobItemInternal
 	metadata := map[string]string{}
 	ctx := context.Background()
 	for currentMaker := initialMarker; currentMaker.NotDone(); {

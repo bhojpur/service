@@ -29,7 +29,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Shopify/sarama"
 	"golang.org/x/oauth2"
 	ccred "golang.org/x/oauth2/clientcredentials"
 )
@@ -44,6 +43,16 @@ type OAuthTokenSource struct {
 	httpClient    *http.Client
 	trustedCas    []*x509.Certificate
 	skipCaVerify  bool
+}
+
+type AccessToken struct {
+	// Token is the access token payload.
+	Token string
+	// Extensions is a optional map of arbitrary key-value pairs that can be
+	// sent with the SASL/OAUTHBEARER initial client response. These values are
+	// ignored by the SASL server if they are unexpected. This feature is only
+	// supported by Kafka >= 2.1.0.
+	Extensions map[string]string
 }
 
 func newOAuthTokenSource(oidcTokenEndpoint, oidcClientID, oidcClientSecret string, oidcScopes []string) OAuthTokenSource {
@@ -103,7 +112,7 @@ func (ts *OAuthTokenSource) configureClient() {
 	}
 }
 
-func (ts *OAuthTokenSource) Token() (*sarama.AccessToken, error) {
+func (ts *OAuthTokenSource) Token() (*AccessToken, error) {
 	if ts.CachedToken.Valid() {
 		return ts.asSaramaToken(), nil
 	}
@@ -129,6 +138,6 @@ func (ts *OAuthTokenSource) Token() (*sarama.AccessToken, error) {
 	return ts.asSaramaToken(), nil
 }
 
-func (ts *OAuthTokenSource) asSaramaToken() *sarama.AccessToken {
-	return &(sarama.AccessToken{Token: ts.CachedToken.AccessToken, Extensions: ts.Extensions})
+func (ts *OAuthTokenSource) asSaramaToken() *AccessToken {
+	return &(AccessToken{Token: ts.CachedToken.AccessToken, Extensions: ts.Extensions})
 }

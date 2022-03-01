@@ -308,7 +308,7 @@ func updateAuthInfo(config *sarama.Config, saslUsername, saslPassword string) {
 	config.Net.SASL.Enable = true
 	config.Net.SASL.User = saslUsername
 	config.Net.SASL.Password = saslPassword
-	config.Net.SASL.Mechanism = sarama.SASLTypePlaintext
+	//config.Net.SASL.Mechanism = sarama.SASLTypePlaintext
 
 	config.Net.TLS.Enable = true
 	// nolint: gosec

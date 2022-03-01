@@ -148,8 +148,8 @@ type hazelcastMessageListener struct {
 	pubsubHandler pubsub.Handler
 }
 
-func (l *hazelcastMessageListener) OnMessage(message hazelcastCore.Message) error {
-	msg, ok := message.MessageObject().([]byte)
+func (l *hazelcastMessageListener) OnMessage(event *hazelcast.MessagePublished) error {
+	msg, ok := event.Value([]byte)
 	if !ok {
 		return errors.New("hazelcast error: cannot cast message to byte array")
 	}
