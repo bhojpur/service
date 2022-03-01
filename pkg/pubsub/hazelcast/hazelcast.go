@@ -30,7 +30,6 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hazelcast/hazelcast-go-client"
-	hazelcastCore "github.com/hazelcast/hazelcast-go-client"
 
 	"github.com/bhojpur/service/pkg/pubsub"
 	"github.com/bhojpur/service/pkg/utils/logger"
@@ -117,13 +116,25 @@ func (p *Hazelcast) Publish(req *pubsub.PublishRequest) error {
 	return nil
 }
 
+// messageListener handles incoming messages to the topic
+func messageListener(event *hazelcast.MessagePublished) {
+	fmt.Println("Received message: ", event.Value)
+	_, ok := event.Value.([]byte)
+	if !ok {
+		return
+	}
+
+	return
+}
+
 func (p *Hazelcast) Subscribe(req pubsub.SubscribeRequest, handler pubsub.Handler) error {
 	topic, err := p.client.GetTopic(p.ctx, req.Topic)
 	if err != nil {
 		return fmt.Errorf("hazelcast error: failed to get topic for %s", req.Topic)
 	}
 
-	_, err = topic.AddMessageListener(p.ctx, &hazelcastMessageListener{p, topic.Name(), handler})
+	//_, err = topic.AddMessageListener(p.ctx, &hazelcastMessageListener{p, topic.Name(), handler})
+	_, err = topic.AddMessageListener(p.ctx, messageListener)
 	if err != nil {
 		return fmt.Errorf("hazelcast error: failed to add new listener, %v", err)
 	}
@@ -149,7 +160,7 @@ type hazelcastMessageListener struct {
 }
 
 func (l *hazelcastMessageListener) OnMessage(event *hazelcast.MessagePublished) error {
-	msg, ok := event.Value([]byte)
+	msg, ok := event.Value.([]byte)
 	if !ok {
 		return errors.New("hazelcast error: cannot cast message to byte array")
 	}
