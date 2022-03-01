@@ -30,9 +30,9 @@ const (
 	undefinedAppID     = ""
 )
 
-// Options defines the sets of options for Bhojpur Application logging.
+// Options defines the sets of options for Bhojpur Application runtime logging.
 type Options struct {
-	// appID is the unique id of Bhojpur Application
+	// appID is the unique id of Bhojpur Application runtime engine instance
 	appID string
 
 	// JSONFormatEnabled is the flag to enable JSON formatted log

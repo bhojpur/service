@@ -123,9 +123,9 @@ func (n *Nacos) createConfigClient() error {
 		Username:             n.settings.Username,
 		Password:             n.settings.Password,
 		LogDir:               n.settings.LogDir,
-		RotateTime:           n.settings.RotateTime,
-		MaxAge:               int64(n.settings.MaxAge),
-		LogLevel:             n.settings.LogLevel,
+		//RotateTime:           n.settings.RotateTime,
+		//MaxAge:               int64(n.settings.MaxAge),
+		LogLevel: n.settings.LogLevel,
 	}
 
 	if len(n.servers) > 0 {

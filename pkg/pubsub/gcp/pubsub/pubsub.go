@@ -301,7 +301,7 @@ func (g *GCPPubSub) ensureSubscription(subscription string, topic string) error 
 	exists, subErr := entity.Exists(context.Background())
 	if !exists {
 		_, subErr = g.client.CreateSubscription(context.Background(), managedSubscription,
-			gcppubsub.SubscriptionConfig{Topic: g.getTopic(topic), EnableMessageOrdering: g.metadata.EnableMessageOrdering})
+			gcppubsub.SubscriptionConfig{Topic: g.getTopic(topic) /* EnableMessageOrdering: g.metadata.EnableMessageOrdering */})
 	}
 
 	return subErr

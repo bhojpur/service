@@ -32,8 +32,8 @@ var verbose bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "service",
-	Short: "Bhojpur Service is an elastic platform stack powered by Kubernetes",
+	Use:   "svcsvr",
+	Short: "Bhojpur ServiceEngine is a high-performance platform integration stack for distributed applications",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if verbose {
 			log.SetLevel(log.DebugLevel)

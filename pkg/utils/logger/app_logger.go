@@ -31,9 +31,9 @@ import (
 type appLogger struct {
 	// name is the name of logger that is published to log as a scope
 	name string
-	// logger is the instance of logrus logger
+	// logger is the instance of logrus standard Logger
 	logger logrus.Logger
-	// format is the instance of custom logging fomatter
+	// format is the instance of Application logger with custom formatter enabled
 	format *logrus.Entry
 }
 
@@ -94,7 +94,7 @@ func (l *appLogger) EnableJSONOutput(enabled bool) {
 
 // SetAppID sets app_id field in the log. Default value is empty string.
 func (l *appLogger) SetAppID(id string) {
-	l.format = l.logger.WithField(logFieldAppID, id)
+	l.format = l.format.WithField(logFieldAppID, id)
 }
 
 func toLogrusLevel(lvl LogLevel) logrus.Level {
@@ -112,56 +112,56 @@ func (l *appLogger) SetOutputLevel(outputLevel LogLevel) {
 func (l *appLogger) WithLogType(logType string) Logger {
 	return &appLogger{
 		name:   l.name,
-		format: l.logger.WithField(logFieldType, logType),
+		format: l.format.WithField(logFieldType, logType),
 	}
 }
 
 // Info logs a message at level Info.
 func (l *appLogger) Info(args ...interface{}) {
-	l.logger.Info(args...)
+	l.format.Info(args...)
 }
 
 // Infof logs a message at level Info.
 func (l *appLogger) Infof(format string, args ...interface{}) {
-	l.logger.Infof(format, args...)
+	l.format.Infof(format, args...)
 }
 
 // Debug logs a message at level Debug.
 func (l *appLogger) Debug(args ...interface{}) {
-	l.logger.Debug(args...)
+	l.format.Debug(args...)
 }
 
 // Debugf logs a message at level Debug.
 func (l *appLogger) Debugf(format string, args ...interface{}) {
-	l.logger.Debugf(format, args...)
+	l.format.Debugf(format, args...)
 }
 
 // Warn logs a message at level Warn.
 func (l *appLogger) Warn(args ...interface{}) {
-	l.logger.Warn(args...)
+	l.format.Warn(args...)
 }
 
 // Warnf logs a message at level Warn.
 func (l *appLogger) Warnf(format string, args ...interface{}) {
-	l.logger.Warnf(format, args...)
+	l.format.Warnf(format, args...)
 }
 
 // Error logs a message at level Error.
 func (l *appLogger) Error(args ...interface{}) {
-	l.logger.Error(args...)
+	l.format.Error(args...)
 }
 
 // Errorf logs a message at level Error.
 func (l *appLogger) Errorf(format string, args ...interface{}) {
-	l.logger.Errorf(format, args...)
+	l.format.Errorf(format, args...)
 }
 
 // Fatal logs a message at level Fatal then the process will exit with status set to 1.
 func (l *appLogger) Fatal(args ...interface{}) {
-	l.logger.Fatal(args...)
+	l.format.Fatal(args...)
 }
 
 // Fatalf logs a message at level Fatal then the process will exit with status set to 1.
 func (l *appLogger) Fatalf(format string, args ...interface{}) {
-	l.logger.Fatalf(format, args...)
+	l.format.Fatalf(format, args...)
 }

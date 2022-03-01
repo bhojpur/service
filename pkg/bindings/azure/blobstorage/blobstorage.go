@@ -287,7 +287,7 @@ func (a *AzureBlobStorage) get(req *bindings.InvokeRequest) (*bindings.InvokeRes
 	}
 
 	ctx := context.TODO()
-	resp, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false)
+	resp, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false, azblob.ClientProvidedKeyOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error downloading az blob: %w", err)
 	}
@@ -307,7 +307,7 @@ func (a *AzureBlobStorage) get(req *bindings.InvokeRequest) (*bindings.InvokeRes
 	}
 
 	if fetchMetadata {
-		props, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{})
+		props, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{}, azblob.ClientProvidedKeyOptions{})
 		if err != nil {
 			return nil, fmt.Errorf("error reading blob metadata: %w", err)
 		}

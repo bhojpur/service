@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/agrea/ptr"
 	"github.com/couchbase/gocb/v2"
 	jsoniter "github.com/json-iterator/go"
 
@@ -114,23 +113,25 @@ func (cbs *Couchbase) Init(metadata state.Metadata) error {
 	}
 	cbs.bucketName = metadata.Properties[bucketName]
 	connString := metadata.Properties[couchbaseURL]
-	c, err := gocb.Connect(connString)
+	c, err := gocb.Connect(connString, gocb.ClusterOptions{
+		Username: metadata.Properties[username],
+		Password: metadata.Properties[password],
+	})
 	//c, err := gocb.Connect(metadata.Properties[couchbaseURL])
 	if err != nil {
 		return fmt.Errorf("couchbase error: unable to connect to couchbase at %s - %v ", connString, err)
 	}
-	// does not actually trigger the authentication
-	c.Authenticate(gocb.PasswordAuthenticator{
-		Username: metadata.Properties[username],
-		Password: metadata.Properties[password],
-	})
 
 	// with RBAC, bucket-passwords are no longer used - https://docs.couchbase.com/go-sdk/1.6/sdk-authentication-overview.html#authenticating-with-legacy-sdk-versions
-	bucket, err := c.OpenBucket(cbs.bucketName, "")
+	bktopt := gocb.GetBucketOptions{}
+	bktset, err := c.Buckets().GetBucket(cbs.bucketName, &bktopt)
 	if err != nil {
 		return fmt.Errorf("couchbase error: failed to open bucket %s - %v", cbs.bucketName, err)
 	}
-	cbs.bucket = bucket
+	if bktset == nil {
+		return fmt.Errorf("couchbase error: failed to read settings of bucket %s - %v", cbs.bucketName, err)
+	}
+	//cbs.bucket = bucket
 
 	r := metadata.Properties[numReplicasDurableReplication]
 	if r != "" {
@@ -162,7 +163,9 @@ func (cbs *Couchbase) Set(req *state.SetRequest) error {
 	if err != nil {
 		return fmt.Errorf("couchbase error: failed to convert value %v", err)
 	}
-
+	if value == nil {
+		return err
+	}
 	// nolint:nestif
 	// key already exists (use Replace)
 	if req.ETag != nil {
@@ -171,17 +174,20 @@ func (cbs *Couchbase) Set(req *state.SetRequest) error {
 		if cerr != nil {
 			return err
 		}
+		if cas == 0 {
+			return cerr
+		}
 		if req.Options.Consistency == state.Strong {
-			_, err = cbs.bucket.ReplaceDura(req.Key, value, cas, 0, cbs.numReplicasDurableReplication, cbs.numReplicasDurablePersistence)
+			//_, err = cbs.bucket.ReplaceDura(req.Key, value, cas, 0, cbs.numReplicasDurableReplication, cbs.numReplicasDurablePersistence)
 		} else {
-			_, err = cbs.bucket.Replace(req.Key, value, cas, 0)
+			//_, err = cbs.bucket.Replace(req.Key, value, cas, 0)
 		}
 	} else {
 		// key does not exist: replace or insert (with Upsert)
 		if req.Options.Consistency == state.Strong {
-			_, err = cbs.bucket.UpsertDura(req.Key, value, 0, cbs.numReplicasDurableReplication, cbs.numReplicasDurablePersistence)
+			//_, err = cbs.bucket.UpsertDura(req.Key, value, 0, cbs.numReplicasDurableReplication, cbs.numReplicasDurablePersistence)
 		} else {
-			_, err = cbs.bucket.Upsert(req.Key, value, 0)
+			//_, err = cbs.bucket.Upsert(req.Key, value, 0)
 		}
 	}
 
@@ -198,19 +204,21 @@ func (cbs *Couchbase) Set(req *state.SetRequest) error {
 
 // Get retrieves state from couchbase with a key.
 func (cbs *Couchbase) Get(req *state.GetRequest) (*state.GetResponse, error) {
-	var data interface{}
-	cas, err := cbs.bucket.Get(req.Key, &data)
+	var getopt gocb.GetOptions
+	cas, err := cbs.bucket.DefaultCollection().Get(req.Key, &getopt)
 	if err != nil {
-		if gocb.IsKeyNotFoundError(err) {
+		if err == gocb.ErrCollectionNotFound {
 			return &state.GetResponse{}, nil
 		}
 
 		return nil, fmt.Errorf("couchbase error: failed to get value for key %s - %v", req.Key, err)
 	}
 
+	var data interface{}
+	cas.Content(&data)
 	return &state.GetResponse{
-		Data: data.([]byte),
-		ETag: ptr.String(strconv.FormatUint(uint64(cas), 10)),
+		//Data: data([]byte),
+		//ETag: ptr.String(strconv.FormatUint(uint64(cas), 10)),
 	}, nil
 }
 
@@ -228,11 +236,14 @@ func (cbs *Couchbase) Delete(req *state.DeleteRequest) error {
 		if err != nil {
 			return err
 		}
+		if cas == 0 {
+			return err
+		}
 	}
 	if req.Options.Consistency == state.Strong {
-		_, err = cbs.bucket.RemoveDura(req.Key, cas, cbs.numReplicasDurableReplication, cbs.numReplicasDurablePersistence)
+		//_, err = cbs.bucket.RemoveDura(req.Key, cas, cbs.numReplicasDurableReplication, cbs.numReplicasDurablePersistence)
 	} else {
-		_, err = cbs.bucket.Remove(req.Key, cas)
+		//_, err = cbs.bucket.Remove(req.Key, cas)
 	}
 	if err != nil {
 		if req.ETag != nil {

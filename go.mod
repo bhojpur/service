@@ -155,7 +155,6 @@ require (
 	github.com/dghubble/sling v1.4.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
-	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
 	github.com/eapache/go-resiliency v1.1.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
@@ -304,7 +303,7 @@ require (
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	k8s.io/klog/v2 v2.4.0 // indirect
+	k8s.io/klog/v2 v2.40.1 // indirect
 	k8s.io/utils v0.0.0-20201110183641-67b214c5f920 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.0.2 // indirect

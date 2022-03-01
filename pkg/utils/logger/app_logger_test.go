@@ -86,7 +86,7 @@ func TestJSONLoggerFields(t *testing.T) {
 			"infof()",
 			InfoLevel,
 			"info",
-			"App_app",
+			"app_app",
 			"King App",
 			"app-pod",
 			func(l *appLogger, msg string) {

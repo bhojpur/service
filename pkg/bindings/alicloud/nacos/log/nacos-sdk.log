@@ -1,0 +1,3 @@
+2022-03-01T06:33:32.323+0530	[31mERROR[0m	request method[GET],request path[http://localhost:8080/fake/nacos/serverlist],header:[null],params:[null],err:Get "http://localhost:8080/fake/nacos/serverlist?": dial tcp [::1]:8080: connect: connection refused
+2022-03-01T06:33:32.497+0530	[34mINFO[0m	http nacos server list: <>
+2022-03-01T06:33:32.497+0530	[31mERROR[0m	get config from server error:server list is empty 
