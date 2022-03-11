@@ -3,7 +3,7 @@ module github.com/bhojpur/service
 go 1.17
 
 require (
-	cloud.google.com/go/datastore v1.1.0
+	cloud.google.com/go/datastore v1.6.0
 	cloud.google.com/go/pubsub v1.3.1
 	cloud.google.com/go/secretmanager v1.2.0
 	cloud.google.com/go/storage v1.14.0
