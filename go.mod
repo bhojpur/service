@@ -100,7 +100,7 @@ require (
 	github.com/vmware/vmware-go-kcl v1.5.0
 	go.mongodb.org/mongo-driver v1.8.3
 	go.uber.org/goleak v1.1.12
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20220307211146-efcb8507fb70
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
