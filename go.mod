@@ -42,7 +42,7 @@ require (
 	github.com/cinience/go_rocketmq v0.0.2
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/couchbase/gocb/v2 v2.4.0
-	github.com/cyphar/filepath-securejoin v0.2.2
+	github.com/cyphar/filepath-securejoin v0.2.3
 	github.com/dancannon/gorethink v4.0.0+incompatible
 	github.com/denisenkom/go-mssqldb v0.12.0
 	github.com/dghubble/go-twitter v0.0.0-20211115160449-93a8679adecb
