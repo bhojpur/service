@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+// Copyright (c) 2018 Bhojpur Consulting Private Limited, India. All rights reserved.
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+package v1.version;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/bhojpur/service/pkg/core/v1/version;version";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
+// Indicates Keyed DB version that introduced the message, used to determine
+// minimal Keyed DB version required to interpret wal that includes this
+// message.
+extend google.protobuf.MessageOptions {
+  optional string keyed_version_msg = 50000;
+}
+
+// Indicates Keyed DB version that introduced the field, used to determine
+// minimal Keyed DB version required to interpret wal that sets this field.
+extend google.protobuf.FieldOptions {
+  optional string keyed_version_field = 50001;
+}
+
+// Indicates Keyed DB version that introduced the enum, used to determine
+// minimal Keyed DB version required to interpret wal that uses this enum.
+extend google.protobuf.EnumOptions {
+  optional string keyed_version_enum = 50002;
+}
+
+// Indicates Keyed DB version that introduced the enum value, used to
+// determine minimal Keyed DB version required to interpret wal that sets
+// this enum value.
+extend google.protobuf.EnumValueOptions {
+  optional string keyed_version_enum_value = 50003;
+}

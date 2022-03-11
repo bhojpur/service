@@ -1,0 +1,362 @@
+package codec
+
+// Copyright (c) 2018 Bhojpur Consulting Private Limited, India. All rights reserved.
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+import (
+	"bytes"
+	"fmt"
+	"reflect"
+
+	"github.com/bhojpur/service/pkg/engine/codec/internal/utils"
+)
+
+// basicEncoder is a Encoder for BasicTestData data types
+type basicEncoder interface {
+	// Encode: encode interface to bytes
+	Encode(input interface{}, signals ...*signal) (buf []byte, err error)
+}
+
+// basicEncoderImpl is implementation of the basicEncoder interface
+type basicEncoderImpl struct {
+	observe        byte
+	root           byte
+	forbidUserKey  func(key byte) bool
+	allowSignalKey func(key byte) bool
+}
+
+// basicEncoderOption create basicEncoderImpl with option
+type basicEncoderOption func(*basicEncoderImpl)
+
+// basicEncoderOptionRoot set root value for creating basicEncoderImpl
+func basicEncoderOptionRoot(root byte) basicEncoderOption {
+	return func(b *basicEncoderImpl) {
+		b.root = root
+	}
+}
+
+// basicEncoderOptionForbidUserKey set func to forbid some key
+func basicEncoderOptionForbidUserKey(f func(key byte) bool) basicEncoderOption {
+	return func(b *basicEncoderImpl) {
+		b.forbidUserKey = f
+	}
+}
+
+// basicEncoderOptionAllowSignalKey set func to allow signal key
+func basicEncoderOptionAllowSignalKey(f func(key byte) bool) basicEncoderOption {
+	return func(b *basicEncoderImpl) {
+		b.allowSignalKey = f
+	}
+}
+
+// newBasicEncoder create a basicEncoder interface
+func newBasicEncoder(observe byte, options ...func(*basicEncoderImpl)) basicEncoder {
+	encoder := &basicEncoderImpl{observe: observe, root: utils.EmptyKey}
+
+	for _, option := range options {
+		option(encoder)
+	}
+
+	if encoder.forbidUserKey != nil && encoder.forbidUserKey(observe) {
+		panic(fmt.Errorf("prohibit the use of this key: %#x", observe))
+	}
+
+	return encoder
+}
+
+// Encode encode interface{} to bytes
+func (e *basicEncoderImpl) Encode(input interface{}, signals ...*signal) (buf []byte, err error) {
+	encoders := make([]*PrimitivePacketEncoder, 0)
+	for _, signal := range signals {
+		encoders = append(encoders, signal.ToEncoder(e.allowSignalKey))
+	}
+	return e.encodeBasic(input, encoders)
+}
+
+// encodeBasic encode interface{} to bytes, and inserting signals
+func (e *basicEncoderImpl) encodeBasic(input interface{}, signals []*PrimitivePacketEncoder) ([]byte, error) {
+	if e.observe == 0 {
+		panic(fmt.Errorf("observe cannot be 0"))
+	}
+
+	var primitiveEncoder *PrimitivePacketEncoder
+
+	value := reflect.ValueOf(input)
+	if value.Type() == utils.TypeOfByteSlice {
+		primitiveEncoder = e.encodeBytes(input)
+	} else {
+		switch value.Kind() {
+		case reflect.String:
+			primitiveEncoder = e.encodeBasicString(input)
+		case reflect.Int32:
+			primitiveEncoder = e.encodeBasicInt32(input)
+		case reflect.Uint32:
+			primitiveEncoder = e.encodeBasicUint32(input)
+		case reflect.Int64:
+			primitiveEncoder = e.encodeBasicInt64(input)
+		case reflect.Uint64:
+			primitiveEncoder = e.encodeBasicUint64(input)
+		case reflect.Float32:
+			primitiveEncoder = e.encodeBasicFloat32(input)
+		case reflect.Float64:
+			primitiveEncoder = e.encodeBasicFloat64(input)
+		case reflect.Bool:
+			primitiveEncoder = e.encodeBasicBool(input)
+		case reflect.Array, reflect.Slice:
+			//e.marshalBasicSlice(value, e.root)
+			return e.encodeBasicSlice(value, signals)
+		default:
+			panic(fmt.Errorf("marshal error, no matching type: %v", value.Kind()))
+		}
+	}
+
+	if primitiveEncoder == nil {
+		panic("PrimitivePacketEncoder is nil")
+	}
+
+	if !utils.IsEmptyKey(e.root) {
+		root := NewNodePacketEncoder(int(e.root))
+		for _, signal := range signals {
+			root.AddPrimitivePacket(signal)
+		}
+		root.AddPrimitivePacket(primitiveEncoder)
+		return root.Encode(), nil
+	}
+
+	buf := make([][]byte, 0)
+	for _, signal := range signals {
+		buf = append(buf, signal.Encode())
+	}
+	buf = append(buf, primitiveEncoder.Encode())
+	return bytes.Join(buf, []byte{}), nil
+}
+
+// encodeBasicSlice encode reflect.Value of slice, and inserting signals
+func (e *basicEncoderImpl) encodeBasicSlice(value reflect.Value, signals []*PrimitivePacketEncoder) ([]byte, error) {
+	var nodeEncoder *NodePacketEncoder
+
+	switch value.Type() {
+	case utils.TypeOfStringSlice:
+		nodeEncoder = e.encodeBasicStringSlice(value)
+	case utils.TypeOfInt32Slice:
+		nodeEncoder = e.encodeBasicInt32Slice(value)
+	case utils.TypeOfUint32Slice:
+		nodeEncoder = e.encodeBasicUint32Slice(value)
+	case utils.TypeOfInt64Slice:
+		nodeEncoder = e.encodeBasicInt64Slice(value)
+	case utils.TypeOfUint64Slice:
+		nodeEncoder = e.encodeBasicUint64Slice(value)
+	case utils.TypeOfFloat32Slice:
+		nodeEncoder = e.encodeBasicFloat32Slice(value)
+	case utils.TypeOfFloat64Slice:
+		nodeEncoder = e.encodeBasicFloat64Slice(value)
+	case utils.TypeOfBoolSlice:
+		nodeEncoder = e.encodeBasicBoolSlice(value)
+	default:
+		panic(fmt.Errorf("marshal error, no matching type in SliceTestData: %v", value.Index(0).Kind()))
+	}
+
+	if nodeEncoder == nil {
+		panic("NodePacketEncoder is nil")
+	}
+
+	if !utils.IsEmptyKey(e.root) {
+		root := NewNodePacketEncoder(int(e.root))
+		for _, signal := range signals {
+			root.AddPrimitivePacket(signal)
+		}
+		root.AddNodePacket(nodeEncoder)
+		return root.Encode(), nil
+	}
+
+	buf := make([][]byte, 0)
+	for _, signal := range signals {
+		buf = append(buf, signal.Encode())
+	}
+	buf = append(buf, nodeEncoder.Encode())
+	return bytes.Join(buf, []byte{}), nil
+}
+
+// encodeBasicString encode string to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBasicString(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetStringValue(fmt.Sprintf("%v", input))
+	return encoder
+}
+
+// encodeBasicInt32 encode int32 to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBasicInt32(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetInt32Value(input.(int32))
+	return encoder
+}
+
+// encodeBasicUint32 encode uint32 to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBasicUint32(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetUInt32Value(input.(uint32))
+	return encoder
+}
+
+// encodeBasicInt64 encode int64 to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBasicInt64(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetInt64Value(input.(int64))
+	return encoder
+}
+
+// encodeBasicUint64 encode uint64 to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBasicUint64(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetUInt64Value(input.(uint64))
+	return encoder
+}
+
+// encodeBasicFloat32 encode float32 to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBasicFloat32(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetFloat32Value(input.(float32))
+	return encoder
+}
+
+// encodeBasicFloat64 encode float64 to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBasicFloat64(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetFloat64Value(input.(float64))
+	return encoder
+}
+
+// encodeBasicBool encode bool to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBasicBool(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetBoolValue(input.(bool))
+	return encoder
+}
+
+// encodeBytes encode []byte to PrimitivePacketEncoder
+func (e *basicEncoderImpl) encodeBytes(input interface{}) *PrimitivePacketEncoder {
+	var encoder = NewPrimitivePacketEncoder(int(e.observe))
+	encoder.SetBytesValue(input.([]byte))
+	return encoder
+}
+
+// encodeBasicStringSlice encode reflect.Value of []string to NodePacketEncoder
+func (e *basicEncoderImpl) encodeBasicStringSlice(value reflect.Value) *NodePacketEncoder {
+	var node = NewNodeSlicePacketEncoder(int(e.observe))
+	if out, ok := utils.ToStringSlice(value.Interface()); ok {
+		for _, v := range out {
+			var item = NewPrimitivePacketEncoder(utils.KeyOfSliceItem)
+			item.SetStringValue(fmt.Sprintf("%v", v))
+			node.AddPrimitivePacket(item)
+		}
+	}
+	return node
+}
+
+// encodeBasicInt32Slice encode reflect.Value of []int32 to NodePacketEncoder
+func (e *basicEncoderImpl) encodeBasicInt32Slice(value reflect.Value) *NodePacketEncoder {
+	var node = NewNodeSlicePacketEncoder(int(e.observe))
+	if out, ok := utils.ToInt64Slice(value.Interface()); ok {
+		for _, v := range out {
+			var item = NewPrimitivePacketEncoder(utils.KeyOfSliceItem)
+			item.SetInt32Value(int32(v.(int64)))
+			node.AddPrimitivePacket(item)
+		}
+	}
+	return node
+}
+
+// encodeBasicUint32Slice encode reflect.Value of []uint32 to NodePacketEncoder
+func (e *basicEncoderImpl) encodeBasicUint32Slice(value reflect.Value) *NodePacketEncoder {
+	var node = NewNodeSlicePacketEncoder(int(e.observe))
+	if out, ok := utils.ToUInt64Slice(value.Interface()); ok {
+		for _, v := range out {
+			var item = NewPrimitivePacketEncoder(utils.KeyOfSliceItem)
+			item.SetUInt32Value(uint32(v.(uint64)))
+			node.AddPrimitivePacket(item)
+		}
+	}
+	return node
+}
+
+// encodeBasicInt64Slice encode reflect.Value of []int64 to NodePacketEncoder
+func (e *basicEncoderImpl) encodeBasicInt64Slice(value reflect.Value) *NodePacketEncoder {
+	var node = NewNodeSlicePacketEncoder(int(e.observe))
+	if out, ok := utils.ToInt64Slice(value.Interface()); ok {
+		for _, v := range out {
+			var item = NewPrimitivePacketEncoder(utils.KeyOfSliceItem)
+			item.SetInt64Value(v.(int64))
+			node.AddPrimitivePacket(item)
+		}
+	}
+	return node
+}
+
+// encodeBasicUint64Slice encode reflect.Value of []uint64 to NodePacketEncoder
+func (e *basicEncoderImpl) encodeBasicUint64Slice(value reflect.Value) *NodePacketEncoder {
+	var node = NewNodeSlicePacketEncoder(int(e.observe))
+	if out, ok := utils.ToUInt64Slice(value.Interface()); ok {
+		for _, v := range out {
+			var item = NewPrimitivePacketEncoder(utils.KeyOfSliceItem)
+			item.SetUInt64Value(v.(uint64))
+			node.AddPrimitivePacket(item)
+		}
+	}
+	return node
+}
+
+// encodeBasicFloat32Slice encode reflect.Value of []float32 to NodePacketEncoder
+func (e *basicEncoderImpl) encodeBasicFloat32Slice(value reflect.Value) *NodePacketEncoder {
+	var node = NewNodeSlicePacketEncoder(int(e.observe))
+	if out, ok := utils.ToUFloat64Slice(value.Interface()); ok {
+		for _, v := range out {
+			var item = NewPrimitivePacketEncoder(utils.KeyOfSliceItem)
+			item.SetFloat32Value(float32(v.(float64)))
+			node.AddPrimitivePacket(item)
+		}
+	}
+	return node
+}
+
+// encodeBasicFloat64Slice encode reflect.Value of []float64 to NodePacketEncoder
+func (e *basicEncoderImpl) encodeBasicFloat64Slice(value reflect.Value) *NodePacketEncoder {
+	var node = NewNodeSlicePacketEncoder(int(e.observe))
+	if out, ok := utils.ToUFloat64Slice(value.Interface()); ok {
+		for _, v := range out {
+			var item = NewPrimitivePacketEncoder(utils.KeyOfSliceItem)
+			item.SetFloat64Value(v.(float64))
+			node.AddPrimitivePacket(item)
+		}
+	}
+	return node
+}
+
+// encodeBasicBoolSlice encode reflect.Value of []bool to NodePacketEncoder
+func (e *basicEncoderImpl) encodeBasicBoolSlice(value reflect.Value) *NodePacketEncoder {
+	var node = NewNodeSlicePacketEncoder(int(e.observe))
+	if out, ok := utils.ToBoolSlice(value.Interface()); ok {
+		for _, v := range out {
+			var item = NewPrimitivePacketEncoder(utils.KeyOfSliceItem)
+			item.SetBoolValue(v.(bool))
+			node.AddPrimitivePacket(item)
+		}
+	}
+	return node
+}

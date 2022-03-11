@@ -9,10 +9,16 @@ tasks:
         - echo "{{.GREETING}}"
         silent: true
 
+    build-tools:
+        desc: Build the software tools for build, release of Bhojpur Service applications
+        cmds:
+        - GOFLAGS=-mod=mod go build -o bin/svcutl client.go 
+        - chmod 755 bin/svcutl
+        - cp bin/svcutl $GOPATH/bin
+
     build-web:
         desc: Build the web application
         cmds:
-        - GOFLAGS=-mod=mod go build -o bin/svcctl client.go 
         - GOFLAGS=-mod=mod go build -o bin/svcsvr server.go 
         - GOFLAGS=-mod=mod go generate ./pkg/webui/...
 

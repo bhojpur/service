@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+// Copyright (c) 2018 Bhojpur Consulting Private Limited, India. All rights reserved.
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+package v1.membership;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "pkg/core/v1/version/version.proto";
+
+option go_package = "github.com/bhojpur/service/pkg/core/v1/membership;membership";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.goproto_getters_all) = false;
+
+// RaftAttributes represents the Raft related attributes of a Keyed DB member.
+message RaftAttributes {
+  option (v1.version.keyed_version_msg) = "1.0";
+
+  // peerURLs is the list of peers in the Raft cluster.
+  repeated string peer_urls = 1;
+  // isLearner indicates if the member is Raft learner.
+  bool is_learner = 2;
+}
+
+// Attributes represents all the non-raft related attributes of a Keyed DB member.
+message Attributes {
+  option (v1.version.keyed_version_msg) = "1.0";
+
+  string name = 1;
+  repeated string client_urls = 2;
+}
+
+message Member {
+  option (v1.version.keyed_version_msg) = "1.0";
+
+  uint64 ID = 1;
+  RaftAttributes raft_attributes = 2;
+  Attributes member_attributes = 3;
+}
+
+message ClusterVersionSetRequest {
+  option (v1.version.keyed_version_msg) = "1.0";
+
+  string ver = 1;
+}
+
+message ClusterMemberAttrSetRequest {
+  option (v1.version.keyed_version_msg) = "1.0";
+
+  uint64 member_ID = 1;
+  Attributes member_attributes = 2;
+}
+
+message DowngradeInfoSetRequest {
+  option (v1.version.keyed_version_msg) = "1.0";
+
+  bool enabled = 1;
+  string ver = 2;
+}

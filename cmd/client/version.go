@@ -21,16 +21,36 @@ package cmd
 // THE SOFTWARE.
 
 import (
-	"github.com/bhojpur/service/pkg/version"
+	"fmt"
+	"runtime/debug"
+
 	"github.com/spf13/cobra"
 )
+
+var (
+	Version = ""
+	Date    = ""
+)
+
+func GetVersion() string {
+	if Version == "" {
+		if info, ok := debug.ReadBuildInfo(); ok {
+			return info.Main.Version
+		}
+		return "(none)"
+	}
+	if Date == "" {
+		return fmt.Sprintf("%s", Version)
+	}
+	return fmt.Sprintf("%s(%s)", Version, Date)
+}
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Prints the version of this Bhojpur Service binary executable image",
+	Short: "print Bhojpur Service CLI version",
 	Run: func(cmd *cobra.Command, args []string) {
-		version.Print()
+		fmt.Println("Bhojpur Service CLI version:", GetVersion())
 	},
 }
 

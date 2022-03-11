@@ -1,0 +1,130 @@
+package main
+
+// Copyright (c) 2018 Bhojpur Consulting Private Limited, India. All rights reserved.
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/dop251/goja"
+	svcsvr "github.com/bhojpur/service/pkg/engine"
+)
+
+// Serverless main function
+func main() {
+	// create a javascript vm
+	vm := goja.New()
+	vm.Set("log", utils.Default())
+	vm.Set("arrayBufferToString", func(buf goja.ArrayBuffer) string { return string(buf.Bytes()) })
+	vm.Set("stringToArrayBuffer", func(v string) goja.ArrayBuffer {
+		return vm.NewArrayBuffer([]byte(v))
+	})
+	// prg, err := complieJS(vm, string(source))
+	prg, err := complieJS(vm, source)
+	if err != nil {
+		utils.Printf("complie js err: %v\n", err)
+		return
+	}
+
+	sfn := svcsvr.NewStreamFunction(
+		"{{.Name}}",
+		svcsvr.WithProcessorAddr("{{.Host}}:{{.Port}}"),
+		svcsvr.WithObserveDataTags(getObserveDataTags(vm, prg)...),
+	)
+	defer sfn.Close()
+
+	// set handler
+	sfn.SetHandler(wrappedHandler(vm, prg))
+
+	// start
+	err = sfn.Connect()
+	if err != nil {
+		utils.Printf("[{{.Name}}] connect err=%v\n", err)
+	}
+
+	select {}
+}
+
+func wrappedHandler(vm *goja.Runtime, prg *goja.Program) func(data []byte) (byte, []byte) {
+	return func(data []byte) (byte, []byte) {
+		id, payload, err := jsHandler(vm, prg, data)
+		if err != nil {
+			utils.Printf("app err: %v", err)
+			return 0x0, nil
+		}
+		return id, payload
+	}
+}
+
+// complieJS
+func complieJS(vm *goja.Runtime, source string) (*goja.Program, error) {
+	prg, err := goja.Compile("", source, false)
+	if err != nil {
+		return nil, err
+	}
+	_, err = vm.RunProgram(prg)
+	if err != nil {
+		return nil, err
+	}
+	return prg, nil
+}
+
+// getObserveDataTags
+func getObserveDataTags(vm *goja.Runtime, prg *goja.Program) (dataTags []byte) {
+	var dataTagsFn func() []byte
+	jsFn := vm.Get("dataTags")
+	if jsFn == nil {
+		utils.Println("`dataTags` function is not found")
+		return
+	}
+	err := vm.ExportTo(jsFn, &dataTagsFn)
+	if err != nil {
+		utils.Println(err)
+	}
+	dataTags = dataTagsFn()
+	return
+}
+
+func jsHandler(vm *goja.Runtime, prg *goja.Program, data []byte) (id byte, payload []byte, err error) {
+	var handlerFn func(goja.ArrayBuffer) map[string]interface{}
+	fn := vm.Get("handler")
+	if fn == nil {
+		err = fmt.Errorf("`handler` function is not found")
+		return
+	}
+	err = vm.ExportTo(fn, &handlerFn)
+	if err != nil {
+		return
+	}
+	// wrapped data
+	buf := vm.NewArrayBuffer(data)
+	result := handlerFn(buf)
+	// result data id
+	if v, ok := result["id"].(int64); ok {
+		id = byte(v)
+	}
+	// result payload
+	if v, ok := result["data"].(goja.ArrayBuffer); ok {
+		payload = v.Bytes()
+	}
+
+	return
+}
