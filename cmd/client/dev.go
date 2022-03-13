@@ -31,22 +31,22 @@ import (
 // devCmd represents the dev command
 var devCmd = &cobra.Command{
 	Use:                "dev",
-	Short:              "Dev a Bhojpur Service Stream Function",
-	Long:               "Dev a Bhojpur Service Stream Function with mocking service-source data from Bhojpur Cloud.",
+	Short:              "Develop a serverless Bhojpur Service stream function",
+	Long:               "Develop a serverless Bhojpur Service stream function with mocking source data from Bhojpur Cloud.",
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			opts.Filename = args[0]
 		}
 		// Serverless
-		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service Stream Function file: %v", opts.Filename)
+		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service stream function filename: %v", opts.Filename)
 		// resolve serverless
-		utils.PendingStatusEvent(os.Stdout, "Create Bhojpur Service Stream Function instance...")
+		utils.PendingStatusEvent(os.Stdout, "Create Bhojpur Service stream function instance...")
 
 		// Connect the serverless to Bhojpur Service dev-server, it will automatically emit the mock data.
-		opts.Host = "dev.bhojpur.net"
+		opts.Host = "localhost"
 		opts.Port = 9140
-		opts.Name = "bhojpur-app-demo"
+		opts.Name = "my-app-demo"
 
 		s, err := serverless.Create(&opts)
 		if err != nil {
@@ -55,14 +55,15 @@ var devCmd = &cobra.Command{
 		}
 
 		// build
-		utils.PendingStatusEvent(os.Stdout, "Bhojpur Service Stream Function building...")
+		utils.PendingStatusEvent(os.Stdout, "Bhojpur Service stream function building...")
 		if err := s.Build(true); err != nil {
 			utils.FailureStatusEvent(os.Stdout, err.Error())
 			return
 		}
-		utils.SuccessStatusEvent(os.Stdout, "Success! Bhojpur Service Stream Function build.")
+		utils.SuccessStatusEvent(os.Stdout, "Success! Bhojpur Service stream function build.")
+
 		// run
-		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service Stream Function is running...")
+		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service stream function is running...")
 		if err := s.Run(verbose); err != nil {
 			utils.FailureStatusEvent(os.Stdout, err.Error())
 			return
@@ -73,7 +74,8 @@ var devCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(devCmd)
 
-	devCmd.Flags().StringVarP(&opts.Filename, "file-name", "f", "app.go", "Stream function file")
-	devCmd.Flags().StringVarP(&opts.Name, "name", "n", "", "Bhojpur Service stream function app name")
+	devCmd.Flags().StringVarP(&opts.Filename, "file-name", "f", "app.go", "Bhojpur Service stream function file name")
+	devCmd.Flags().StringVarP(&url, "url", "u", "localhost:9140", "Bhojpur Service-Processor endpoint addrress")
+	devCmd.Flags().StringVarP(&opts.Name, "name", "n", "", "Bhojpur Service stream function name")
 	devCmd.Flags().StringVarP(&opts.ModFile, "modfile", "m", "", "custom go.mod")
 }

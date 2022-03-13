@@ -70,19 +70,19 @@ func TestGoHandler(t *testing.T) {
 func TestJSHandler(t *testing.T) {
 	source := `
 function handler(data) {
-	utils.Println(">> JS Handler Begin");
+	log.Println(">> JS Handler Begin");
 	var uint8buf = new Uint8Array(data); 
 	// go method
 	// var decodedString = svcsvr.ArrayBufferToString(data);
-	// utils.Printf(">> data.string: %s", decodedString);
+	// log.Printf(">> data.string: %s", decodedString);
 	// js method
 	decodedString = decode(uint8buf);
-	utils.Printf(">> data.string: %s", decodedString);
+	log.Printf(">> data.string: %s", decodedString);
 	// JSON
 	var jsonData=JSON.parse(decodedString);
-	utils.Printf(">> data.JSON: %v", jsonData);
-	utils.Printf(">> data.Hex: %v", ab2hex(data));
-	utils.Println(">> JS Handler End");
+	log.Printf(">> data.JSON: %v", jsonData);
+	log.Printf(">> data.Hex: %v", ab2hex(data));
+	log.Println(">> JS Handler End");
 	return {id:0x35, data:data}
 }
 

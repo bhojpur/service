@@ -1,0 +1,6 @@
+name: Service
+host: localhost
+port: 9140
+functions:
+  - name: Noise
+  - name: MockDB

@@ -31,15 +31,15 @@ import (
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
 	Use:   "build",
-	Short: "Build the Bhojpur Service Stream Function",
-	Long:  "Build the Bhojpur Service Stream Function as binary file",
+	Short: "Build the Bhojpur Service stream function",
+	Long:  "Build the Bhojpur Service stream function as binary file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			opts.Filename = args[0]
 		}
-		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service Stream Function file: %v", opts.Filename)
+		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service stream function file: %v", opts.Filename)
 		// resolve serverless
-		utils.PendingStatusEvent(os.Stdout, "Create Bhojpur Service Stream Function instance...")
+		utils.PendingStatusEvent(os.Stdout, "Create Bhojpur Service stream function instance...")
 		if err := parseURL(url, &opts); err != nil {
 			utils.FailureStatusEvent(os.Stdout, err.Error())
 			return
@@ -50,26 +50,26 @@ var buildCmd = &cobra.Command{
 			return
 		}
 		utils.InfoStatusEvent(os.Stdout,
-			"Starting the Bhojpur Service Stream Function instance with Name: %s. Host: %s. Port: %d.",
+			"Starting the Bhojpur Service stream function instance with Name: %s. Host: %s. Port: %d.",
 			opts.Name,
 			opts.Host,
 			opts.Port,
 		)
 		// build
-		utils.PendingStatusEvent(os.Stdout, "Bhojpur Service Stream Function function building...")
+		utils.PendingStatusEvent(os.Stdout, "Bhojpur Service stream function function building...")
 		if err := s.Build(true); err != nil {
 			utils.FailureStatusEvent(os.Stdout, err.Error())
 			return
 		}
-		utils.SuccessStatusEvent(os.Stdout, "Success! Bhojpur Service Stream Function build.")
+		utils.SuccessStatusEvent(os.Stdout, "Success! Bhojpur Service stream function build.")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(buildCmd)
 
-	buildCmd.Flags().StringVarP(&opts.Filename, "file-name", "f", "app.go", "Stream function file (default is app.go)")
-	buildCmd.Flags().StringVarP(&url, "url", "u", "localhost:9000", "Bhojpur Serice-Processor endpoint addr")
+	buildCmd.Flags().StringVarP(&opts.Filename, "file-name", "f", "app.go", "Bhojpur Service stream function file (default is app.go)")
+	buildCmd.Flags().StringVarP(&url, "url", "u", "localhost:9140", "Bhojpur Serice-Processor endpoint address")
 	buildCmd.Flags().StringVarP(&opts.Name, "name", "n", "", "Bhojpur Service stream function app name (required). It should match the specific service name in Bhojpur Service-Processor config (workflow.yaml)")
 	buildCmd.MarkFlagRequired("name")
 	buildCmd.Flags().StringVarP(&opts.ModFile, "modfile", "m", "", "custom go.mod")

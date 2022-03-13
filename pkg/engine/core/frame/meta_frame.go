@@ -63,13 +63,13 @@ func (m *MetaFrame) Encode() []byte {
 
 // DecodeToMetaFrame decode a MetaFrame instance from given buffer.
 func DecodeToMetaFrame(buf []byte) (*MetaFrame, error) {
-	//nodeBlock := codec.NodePacket{}
 	nodeBlock, _, err := codec.DecodeNodePacket(buf)
 	if err != nil {
 		return nil, err
 	}
 
 	meta := &MetaFrame{}
+	meta.tid = string(nodeBlock.GetValBuf())
 	for _, v := range nodeBlock.PrimitivePackets {
 		val, _ := v.ToUTF8String()
 		meta.tid = val

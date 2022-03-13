@@ -320,9 +320,9 @@ type Stream interface {
 	// and emit them rather than emitting the items one at a time.
 	WindowWithTimeOrCount(milliseconds uint32, count int, opts ...reactive.Option) Stream
 
-	// ZipFromIterable merges the emissions of an Iterable via a specified function
+	// ProcessFromIterable merges the emissions of an Iterable via a specified function
 	// and emit single items for each combination based on the results of this function.
-	ZipFromIterable(iterable reactive.Iterable, processor reactive.Func2, opts ...reactive.Option) Stream
+	ProcessFromIterable(iterable reactive.Iterable, processor reactive.Func2, opts ...reactive.Option) Stream
 
 	// SlidingWindowWithCount buffers the data in the specified sliding window size, the buffered data can be processed in the handler func.
 	// It returns the orginal data to Stream, not the buffered slice.
@@ -332,8 +332,8 @@ type Stream interface {
 	// It returns the orginal data to Stream, not the buffered slice.
 	SlidingWindowWithTime(windowTimeInMS uint32, slideTimeInMS uint32, handler Handler, opts ...reactive.Option) Stream
 
-	// // ZipMultiObservers subscribes multi Bhojpur Service observers, zips the values into a slice and calls the processor callback when all keys are observed.
-	// ZipMultiObservers(observers []KeyObserveFunc, processor func(items []interface{}) (interface{}, error)) Stream
+	// // ProcessMultiObservers subscribes multi Bhojpur Service observers, processes the values into a slice and calls the processor callback when all keys are observed.
+	// ProcessMultiObservers(observers []KeyObserveFunc, processor func(items []interface{}) (interface{}, error)) Stream
 }
 
 // // KeyObserveFunc is a pair of subscribed key and onObserve callback.

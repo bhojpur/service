@@ -89,7 +89,6 @@ func (h *HandshakeFrame) Encode() []byte {
 
 // DecodeToHandshakeFrame decodes Bhojpur Service encoded bytes to HandshakeFrame.
 func DecodeToHandshakeFrame(buf []byte) (*HandshakeFrame, error) {
-	//node := codec.NodePacket{}
 	node, _, err := codec.DecodeNodePacket(buf)
 	if err != nil {
 		return nil, err
@@ -98,7 +97,7 @@ func DecodeToHandshakeFrame(buf []byte) (*HandshakeFrame, error) {
 	handshake := &HandshakeFrame{}
 
 	// name
-	nameBlock := node.PrimitivePackets[int(byte(TagOfHandshakeName))]
+	nameBlock := node.PrimitivePackets[0]
 	name, err := nameBlock.ToUTF8String()
 	if err != nil {
 		return nil, err
@@ -106,16 +105,16 @@ func DecodeToHandshakeFrame(buf []byte) (*HandshakeFrame, error) {
 	handshake.Name = name
 
 	// type
-	typeBlock := node.PrimitivePackets[int(byte(TagOfHandshakeType))]
+	typeBlock := node.PrimitivePackets[1]
 	clientType := typeBlock.ToBytes()
 	handshake.ClientType = clientType[0]
 
 	// observe data tag
-	observeDataTagsBlock := node.PrimitivePackets[int(byte(TagOfHandshakeObserveDataTags))]
+	observeDataTagsBlock := node.PrimitivePackets[2]
 	handshake.ObserveDataTags = observeDataTagsBlock.ToBytes()
 
 	// app id
-	appIDBlock := node.PrimitivePackets[int(byte(TagOfHandshakeAppID))]
+	appIDBlock := node.PrimitivePackets[3]
 	appID, err := appIDBlock.ToUTF8String()
 	if err != nil {
 		return nil, err
@@ -123,12 +122,12 @@ func DecodeToHandshakeFrame(buf []byte) (*HandshakeFrame, error) {
 	handshake.appID = appID
 
 	// auth
-	authTypeBlock := node.PrimitivePackets[int(byte(TagOfHandshakeAuthType))]
+	authTypeBlock := node.PrimitivePackets[4]
 	authType := authTypeBlock.ToBytes()
 	handshake.authType = authType[0]
 
 	// auth
-	authPayloadBlock := node.PrimitivePackets[int(byte(TagOfHandshakeAuthPayload))]
+	authPayloadBlock := node.PrimitivePackets[5]
 	authPayload := authPayloadBlock.ToBytes()
 	handshake.authPayload = authPayload
 

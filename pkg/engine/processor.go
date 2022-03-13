@@ -28,7 +28,7 @@ import (
 	"net/http"
 
 	"github.com/bhojpur/service/pkg/engine/config"
-	"github.com/bhojpur/service/pkg/engine/core"
+	engine "github.com/bhojpur/service/pkg/engine/core"
 	"github.com/bhojpur/service/pkg/engine/logger"
 )
 
@@ -38,13 +38,13 @@ const (
 
 // Processor is the orchestrator of Bhojpur Service. There are two types of processor:
 // 1. Upstream Processor, which is used to connect to multiple downstream processors,
-// 2. Downstream Processor (will call it as Processor directly), which is used
-// to connected by `Upstream Processor`, `Source` and `Stream Function`
+// 2. Downstream Processor (will call it as Processor directly), which is used to be
+// connected by `Upstream Processor`, `Source`, and `Stream Function`.
 type Processor interface {
 	// ConfigWorkflow will register workflows from config files to processor.
 	ConfigWorkflow(conf string) error
 
-	// ConfigMesh will register edge-mesh config URL
+	// ConfigMesh will register EdgeMesh config URL
 	ConfigMesh(url string) error
 
 	// ListenAndServe start processor as server.
@@ -63,26 +63,26 @@ type Processor interface {
 	Close() error
 
 	// ReadConfigFile(conf string) error
-	// AddWorkflow(wf ...core.Workflow) error
+	// AddWorkflow(wf ...engine.Workflow) error
 	// ConfigDownstream(opts ...interface{}) error
 	// Connect() error
 	// RemoveDownstreamProcessor(downstream Processor) error
 	// ListenAddr() string
 }
 
-// processor is the implementation of Processor interface.
+// processor is the implementation of Bhojpur Service-Processor interface.
 type processor struct {
 	name                 string
 	addr                 string
 	hasDownstreams       bool
-	server               *core.Server
-	client               *core.Client
+	server               *engine.Server
+	client               *engine.Client
 	downstreamProcessors []Processor
 }
 
 var _ Processor = &processor{}
 
-// NewProcessorWithOptions create a processor instance.
+// NewProcessorWithOptions create a Bhojpur Service-Processor instance.
 func NewProcessorWithOptions(name string, opts ...Option) Processor {
 	options := NewOptions(opts...)
 	processor := createProcessorServer(name, options)
@@ -91,7 +91,7 @@ func NewProcessorWithOptions(name string, opts ...Option) Processor {
 	return processor
 }
 
-// NewProcessor create a processor instance from config files.
+// NewProcessor create a Bhojpur Service-Processor instance from config files.
 func NewProcessor(conf string) (Processor, error) {
 	config, err := config.ParseWorkflowConfig(conf)
 	if err != nil {
@@ -110,10 +110,10 @@ func NewProcessor(conf string) (Processor, error) {
 	return processor, err
 }
 
-// NewDownstreamProcessor create a processor descriptor for downstream processor.
+// NewDownstreamProcessor create a Service-Processor descriptor for downstream processor.
 func NewDownstreamProcessor(name string, opts ...Option) Processor {
 	options := NewOptions(opts...)
-	client := core.NewClient(name, core.ClientTypeUpstreamProcessor, options.ClientOptions...)
+	client := engine.NewClient(name, engine.ClientTypeUpstreamProcessor, options.ClientOptions...)
 
 	return &processor{
 		name:   name,
@@ -123,10 +123,10 @@ func NewDownstreamProcessor(name string, opts ...Option) Processor {
 }
 
 /*************** Server ONLY ***************/
-// createProcessorServer create a processor instance as server.
+// createProcessorServer create a Bhojpur Service-Processor instance as a server engine.
 func createProcessorServer(name string, options *Options) *processor {
 	// create underlying QUIC server
-	srv := core.NewServer(name, options.ServerOptions...)
+	srv := engine.NewServer(name, options.ServerOptions...)
 	z := &processor{
 		server: srv,
 		name:   name,
@@ -158,7 +158,7 @@ func (z *processor) ConfigMesh(url string) error {
 		return nil
 	}
 
-	logger.Printf("%sDownloading mesh config...", processorLogPrefix)
+	logger.Printf("%sDownloading the EdgeMesh configuration...", processorLogPrefix)
 	// download mesh conf
 	res, err := http.Get(url)
 	if err != nil {
@@ -170,11 +170,11 @@ func (z *processor) ConfigMesh(url string) error {
 	var configs []config.MeshProcessor
 	err = decoder.Decode(&configs)
 	if err != nil {
-		logger.Errorf("%s✅ downloaded the Mesh config with err=%v", processorLogPrefix, err)
+		logger.Errorf("%s✅ downloaded the EdgeMesh configuration with err=%v", processorLogPrefix, err)
 		return err
 	}
 
-	logger.Printf("%s✅ Successfully downloaded the Service Mesh config. ", processorLogPrefix)
+	logger.Printf("%s✅ Successfully downloaded the EdgeMesh configuration.", processorLogPrefix)
 
 	if len(configs) == 0 {
 		return nil
@@ -193,7 +193,7 @@ func (z *processor) ConfigMesh(url string) error {
 
 // ListenAndServe will start processor service.
 func (z *processor) ListenAndServe() error {
-	logger.Debugf("%sCreating Processor Server ...", processorLogPrefix)
+	logger.Debugf("%sCreating a Bhojpur Service-Processor instance...", processorLogPrefix)
 	// check downstream processors
 	for _, ds := range z.downstreamProcessors {
 		if dsProcessor, ok := ds.(*processor); ok {
@@ -254,7 +254,7 @@ func (z *processor) Close() error {
 
 // Stats inspects current server.
 func (z *processor) Stats() int {
-	log.Printf("[%s] all sfn connected: %d", z.name, len(z.server.StatsFunctions()))
+	log.Printf("[%s] all stream functions connected: %d", z.name, len(z.server.StatsFunctions()))
 	for k := range z.server.StatsFunctions() {
 		log.Printf("[%s] -> ConnID=%v", z.name, k)
 	}

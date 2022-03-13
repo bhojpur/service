@@ -24,7 +24,7 @@ import (
 	"crypto/tls"
 
 	pkgauth "github.com/bhojpur/service/pkg/engine/auth"
-	"github.com/bhojpur/service/pkg/engine/core"
+	engine "github.com/bhojpur/service/pkg/engine/core"
 	"github.com/bhojpur/service/pkg/engine/core/auth"
 	"github.com/bhojpur/service/pkg/engine/core/log"
 	"github.com/lucas-clemente/quic-go"
@@ -43,9 +43,9 @@ type Options struct {
 	ProcessorAddr string // target Processor endpoint address
 	// ProcessorListenAddr     string // Processor endpoint address
 	ProcessorWorkflowConfig string // Processor workflow file
-	MeshConfigURL           string // meshConfigURL is the URL of edge-mesh config
-	ServerOptions           []core.ServerOption
-	ClientOptions           []core.ClientOption
+	MeshConfigURL           string // meshConfigURL is the URL of EdgeMesh config
+	ServerOptions           []engine.ServerOption
+	ClientOptions           []engine.ClientOption
 	QuicConfig              *quic.Config
 	TLSConfig               *tls.Config
 	Logger                  log.Logger
@@ -67,7 +67,7 @@ func WithProcessorAddr(addr string) Option {
 
 // TODO: WithWorkflowConfig
 
-// WithMeshConfigURL sets the initial edge-mesh config URL for the Bhojpur Service-Processor.
+// WithMeshConfigURL sets the initial EdgeMesh config URL for the Bhojpur Service-Processor.
 func WithMeshConfigURL(url string) Option {
 	return func(o *Options) {
 		o.MeshConfigURL = url
@@ -86,13 +86,13 @@ func WithQuicConfig(qc *quic.Config) Option {
 	}
 }
 
-func WithClientOptions(opts ...core.ClientOption) Option {
+func WithClientOptions(opts ...engine.ClientOption) Option {
 	return func(o *Options) {
 		o.ClientOptions = opts
 	}
 }
 
-func WithServerOptions(opts ...core.ServerOption) Option {
+func WithServerOptions(opts ...engine.ServerOption) Option {
 	return func(o *Options) {
 		o.ServerOptions = opts
 	}
@@ -103,7 +103,7 @@ func WithAuth(auth auth.Authentication) Option {
 	return func(o *Options) {
 		o.ServerOptions = append(
 			o.ServerOptions,
-			core.WithAuth(auth),
+			engine.WithAuth(auth),
 		)
 	}
 }
@@ -118,7 +118,7 @@ func WithCredential(cred auth.Credential) Option {
 	return func(o *Options) {
 		o.ClientOptions = append(
 			o.ClientOptions,
-			core.WithCredential(cred),
+			engine.WithCredential(cred),
 		)
 	}
 }
@@ -128,7 +128,7 @@ func WithObserveDataTags(tags ...byte) Option {
 	return func(o *Options) {
 		o.ClientOptions = append(
 			o.ClientOptions,
-			core.WithObserveDataTags(tags...),
+			engine.WithObserveDataTags(tags...),
 		)
 	}
 }
@@ -138,7 +138,7 @@ func WithLogger(logger log.Logger) Option {
 	return func(o *Options) {
 		o.ClientOptions = append(
 			o.ClientOptions,
-			core.WithLogger(logger),
+			engine.WithLogger(logger),
 		)
 	}
 }

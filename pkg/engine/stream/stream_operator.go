@@ -556,11 +556,11 @@ func (s *StreamImpl) WindowWithTimeOrCount(milliseconds uint32, count int, opts 
 	return &StreamImpl{ctx: s.ctx, observable: reactive.FromChannel(s.observable.WindowWithTimeOrCount(getRxDuration(milliseconds), count, opts...).Observe(), opts...)}
 }
 
-// ZipFromIterable merges the emissions of an Iterable via a specified function
+// ProcessFromIterable merges the emissions of an Iterable via a specified function
 // and emit single items for each combination based on the results of this function.
-func (s *StreamImpl) ZipFromIterable(iterable reactive.Iterable, processor reactive.Func2, opts ...reactive.Option) Stream {
+func (s *StreamImpl) ProcessFromIterable(iterable reactive.Iterable, processor reactive.Func2, opts ...reactive.Option) Stream {
 	opts = appendContinueOnError(s.ctx, opts...)
-	return &StreamImpl{ctx: s.ctx, observable: reactive.FromChannel(s.observable.ZipFromIterable(iterable, processor, opts...).Observe(), opts...)}
+	return &StreamImpl{ctx: s.ctx, observable: reactive.FromChannel(s.observable.ProcessFromIterable(iterable, processor, opts...).Observe(), opts...)}
 }
 
 // Observe the items in Reactive Stream.
@@ -670,15 +670,15 @@ func (s *StreamImpl) RawBytes() Stream {
 	// return CreateObservable(s.ctx, f)
 }
 
-// // ZipMultiObservers subscribes multi Bhojpur Service observers, zips the values into a slice and calls the processor callback when all keys are observed.
-// func (s *StreamImpl) ZipMultiObservers(observers []KeyObserveFunc, processor func(items []interface{}) (interface{}, error)) Stream {
+// // ProcessMultiObservers subscribes multi Bhojpur Service observers, processess the values into a slice and calls the processor callback when all keys are observed.
+// func (s *StreamImpl) ProcessMultiObservers(observers []KeyObserveFunc, processor func(items []interface{}) (interface{}, error)) Stream {
 // 	count := len(observers)
 // 	if count < 2 {
-// 		return s.thrown(errors.New("[ZipMultiObservers] the number of observers must be >= 2"))
+// 		return s.thrown(errors.New("[ProcessMultiObservers] the number of observers must be >= 2"))
 // 	}
 
-// 	// the function to zip the values into a slice
-// 	var zipObserveFunc = func(_ context.Context, a interface{}, b interface{}) (interface{}, error) {
+// 	// the function to process the values into a slice
+// 	var processObserveFunc = func(_ context.Context, a interface{}, b interface{}) (interface{}, error) {
 // 		items, ok := a.([]interface{})
 // 		if !ok {
 // 			return []interface{}{a, b}, nil
@@ -688,7 +688,7 @@ func (s *StreamImpl) RawBytes() Stream {
 // 		return items, nil
 // 	}
 
-// 	// the function of the `ZipMultiObservers` operator
+// 	// the function of the `ProcessMultiObservers` operator
 // 	f := func(ctx context.Context, next chan reactive.Item) {
 // 		defer close(next)
 
@@ -705,10 +705,10 @@ func (s *StreamImpl) RawBytes() Stream {
 // 			keyObservables[i] = reactive.FromChannel(ch)
 // 		}
 
-// 		// zip all observables
-// 		zipObservable := keyObservables[0]
+// 		// process all observables
+// 		processObservable := keyObservables[0]
 // 		for i := 1; i < count; i++ {
-// 			zipObservable = zipObservable.ZipFromIterable(keyObservables[i], zipObserveFunc)
+// 			processObservable = processObservable.ProcessFromIterable(keyObservables[i], processObserveFunc)
 // 		}
 
 // 		observe := s.Observe()
@@ -750,7 +750,7 @@ func (s *StreamImpl) RawBytes() Stream {
 // 								if ch != nil {
 // 									ch <- reactive.Item{V: kv.Value}
 // 								} else {
-// 									ch <- reactive.Item{E: fmt.Errorf("[ZipMultiObservers] ch is not found for key %v", kv.Key)}
+// 									ch <- reactive.Item{E: fmt.Errorf("[ProcessMultiObservers] ch is not found for key %v", kv.Key)}
 // 								}
 // 							}
 // 						}
@@ -760,23 +760,23 @@ func (s *StreamImpl) RawBytes() Stream {
 // 		}()
 
 // 		for {
-// 			// observe the value from zipObservable
-// 			for item := range zipObservable.Observe(reactive.WithErrorStrategy(reactive.ContinueOnError)) {
+// 			// observe the value from processObservable
+// 			for item := range processObservable.Observe(reactive.WithErrorStrategy(reactive.ContinueOnError)) {
 // 				if item.Error() {
-// 					logger.Error("[ZipMultiObservers] observe the value failed.", "err", item.E)
+// 					logger.Error("[ProcessMultiObservers] observe the value failed.", "err", item.E)
 // 					continue
 // 				}
 
 // 				items, ok := item.V.([]interface{})
 // 				if !ok {
-// 					logger.Error("[ZipMultiObservers] item.V is not a slice")
+// 					logger.Error("[ProcessMultiObservers] item.V is not a slice")
 // 					continue
 // 				}
 
 // 				// call the processor callback
 // 				v, err := processor(items)
 // 				if err != nil {
-// 					logger.Error("[ZipMultiObservers] processor func returns an err.", "err", err)
+// 					logger.Error("[ProcessMultiObservers] processor func returns an err.", "err", err)
 // 					continue
 // 				}
 

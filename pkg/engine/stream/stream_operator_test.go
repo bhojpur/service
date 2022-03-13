@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// HELPER FUNCTIONS
+// Helper Functions
 
 // // Reference:
 // func channelValue(ctx context.Context, items ...interface{}) chan reactive.Item {

@@ -24,9 +24,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/spf13/cobra"
-	"github.com/bhojpur/service/pkg/utils"
 	"github.com/bhojpur/service/pkg/serverless/golang"
+	"github.com/bhojpur/service/pkg/utils"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -36,19 +36,19 @@ var (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize a Bhojpur Service Stream function",
-	Long:  "Initialize a Bhojpur Service Stream function",
+	Short: "Create and initialize a new Bhojpur Service stream function",
+	Long:  "Initialize a new Bhojpur Service stream function that could be compiled into binary format",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) >= 1 && args[0] != "" {
 			name = args[0]
 		}
 
 		if name == "" {
-			utils.FailureStatusEvent(os.Stdout, "Please input your app name")
+			utils.FailureStatusEvent(os.Stdout, "Please input your custom Stream Function name")
 			return
 		}
 
-		utils.PendingStatusEvent(os.Stdout, "Initializing the Stream Function...")
+		utils.PendingStatusEvent(os.Stdout, "Initializing the custom Stream Function...")
 		// create app.go
 		fname := filepath.Join(name, "app.go")
 		if err := utils.PutContents(fname, golang.InitFuncTmpl); err != nil {
@@ -56,15 +56,15 @@ var initCmd = &cobra.Command{
 			return
 		}
 
-		utils.SuccessStatusEvent(os.Stdout, "Congratulations! You have initialized the stream function successfully.")
-		utils.InfoStatusEvent(os.Stdout, "You can enjoy the Bhojpur Service Stream Function via the command: ")
+		utils.SuccessStatusEvent(os.Stdout, "Congratulations! You have initialized the Stream Function successfully.")
+		utils.InfoStatusEvent(os.Stdout, "You can enjoy the Bhojpur Service stream function using following command: ")
 		utils.InfoStatusEvent(os.Stdout, "\tDEV: \tsvcutl dev -n %s %s/app.go", "Noise", name)
-		utils.InfoStatusEvent(os.Stdout, "\tPROD: \tFirst run source application, e.g: go run example/source/main.go\r\n\t\tSecond: svcutl run -n %s %s/app.go", name, name)
+		utils.InfoStatusEvent(os.Stdout, "\tPROD: \tFirstly, run a Source application (e.g., go run internal/source/main.go)\r\n\t\tSecondly, svcutl run -n %s %s/app.go", "Noise", name)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
 
-	initCmd.Flags().StringVarP(&name, "name", "n", "", "The name of Stream Function")
+	initCmd.Flags().StringVarP(&name, "name", "n", "", "The name of Bhojpur Service stream function")
 }

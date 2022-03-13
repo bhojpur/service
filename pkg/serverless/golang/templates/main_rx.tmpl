@@ -27,7 +27,7 @@ func main() {
 	)
 	defer sfn.Close()
 
-	// create a Rx runtime.
+	// create a Reactive runtime.
 	rt := rx.NewRuntime(sfn)
 
 	// set handler
@@ -36,10 +36,10 @@ func main() {
 	// start
 	err := sfn.Connect()
 	if err != nil {
-		utils.Print("[flow] connect err=%v", err)
+		log.Print("[bhojpur:flow] connect err=%v", err)
 	}
 
-	// pipe rx stream and rx handler.
+	// pipe reactive stream and reactive handler.
 	rt.Pipe(Handler)
 
 	select {}

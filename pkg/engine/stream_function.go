@@ -23,12 +23,12 @@ package engine
 import (
 	"context"
 
-	"github.com/bhojpur/service/pkg/engine/core"
+	engine "github.com/bhojpur/service/pkg/engine/core"
 	"github.com/bhojpur/service/pkg/engine/core/frame"
 )
 
 const (
-	streamFunctionLogPrefix = "\033[31m[bhojpur:sfn]\033[0m "
+	streamFunctionLogPrefix = "\033[31m[bhojpur:streamfunc]\033[0m "
 )
 
 // StreamFunction defines serverless streaming functions.
@@ -37,9 +37,9 @@ type StreamFunction interface {
 	// Deprecated: use bhojpur.WithObserveDataTags instead
 	SetObserveDataTags(tag ...byte)
 	// SetHandler set the handler function, which accept the raw bytes data and return the tag & response
-	SetHandler(fn core.AsyncHandler) error
+	SetHandler(fn engine.AsyncHandler) error
 	// SetPipeHandler set the pipe handler function
-	SetPipeHandler(fn core.PipeHandler) error
+	SetPipeHandler(fn engine.PipeHandler) error
 	// Connect create a connection to the Processor
 	Connect() error
 	// Close will close the connection
@@ -51,7 +51,7 @@ type StreamFunction interface {
 // NewStreamFunction create a stream function.
 func NewStreamFunction(name string, opts ...Option) StreamFunction {
 	options := NewOptions(opts...)
-	client := core.NewClient(name, core.ClientTypeStreamFunction, options.ClientOptions...)
+	client := engine.NewClient(name, engine.ClientTypeStreamFunction, options.ClientOptions...)
 	sfn := &streamFunction{
 		name:              name,
 		processorEndpoint: options.ProcessorAddr,
@@ -68,10 +68,10 @@ var _ StreamFunction = &streamFunction{}
 type streamFunction struct {
 	name              string
 	processorEndpoint string
-	client            *core.Client
-	observeDataTags   []byte            // tag list that will be observed
-	fn                core.AsyncHandler // user's function which will be invoked when data arrived
-	pfn               core.PipeHandler
+	client            *engine.Client
+	observeDataTags   []byte              // tag list that will be observed
+	fn                engine.AsyncHandler // user's function which will be invoked when data arrived
+	pfn               engine.PipeHandler
 	pIn               chan []byte
 	pOut              chan *frame.PayloadFrame
 }
@@ -84,13 +84,13 @@ func (s *streamFunction) SetObserveDataTags(tag ...byte) {
 }
 
 // SetHandler set the handler function, which accept the raw bytes data and return the tag & response.
-func (s *streamFunction) SetHandler(fn core.AsyncHandler) error {
+func (s *streamFunction) SetHandler(fn engine.AsyncHandler) error {
 	s.fn = fn
 	s.client.Logger().Debugf("%sSetHandler(%v)", streamFunctionLogPrefix, s.fn)
 	return nil
 }
 
-func (s *streamFunction) SetPipeHandler(fn core.PipeHandler) error {
+func (s *streamFunction) SetPipeHandler(fn engine.PipeHandler) error {
 	s.pfn = fn
 	s.client.Logger().Debugf("%sSetHandler(%v)", streamFunctionLogPrefix, s.fn)
 	return nil
@@ -120,7 +120,7 @@ func (s *streamFunction) Connect() error {
 			for {
 				data := <-s.pOut
 				if data != nil {
-					s.client.Logger().Debugf("%spipe fn send: tag=%#x, data=%# x", streamFunctionLogPrefix, data.Tag, data.Carriage)
+					s.client.Logger().Debugf("%spipe function send: tag=%#x, data=%# x", streamFunctionLogPrefix, data.Tag, data.Carriage)
 					frame := frame.NewDataFrame()
 					// todo: frame.SetTransactionID
 					frame.SetCarriage(data.Tag, data.Carriage)
@@ -163,10 +163,10 @@ func (s *streamFunction) onDataFrame(data []byte, metaFrame *frame.MetaFrame) {
 
 	if s.fn != nil {
 		go func() {
-			s.client.Logger().Debugf("%sexecute-start fn: data[%d]=%# x", streamFunctionLogPrefix, len(data), frame.Shortly(data))
+			s.client.Logger().Debugf("%sexecute-start function: data[%d]=%# x", streamFunctionLogPrefix, len(data), frame.Shortly(data))
 			// invoke serverless
 			tag, resp := s.fn(data)
-			s.client.Logger().Debugf("%sexecute-done fn: tag=%#x, resp[%d]=%# x", streamFunctionLogPrefix, tag, len(resp), frame.Shortly(resp))
+			s.client.Logger().Debugf("%sexecute-done function: tag=%#x, resp[%d]=%# x", streamFunctionLogPrefix, tag, len(resp), frame.Shortly(resp))
 			// if resp is not nil, means the user's function has returned something, we should send it to the Processor
 			if len(resp) != 0 {
 				s.client.Logger().Debugf("%sstart WriteFrame(): tag=%#x, data[%d]=%# x", streamFunctionLogPrefix, tag, len(resp), frame.Shortly(resp))
@@ -180,7 +180,7 @@ func (s *streamFunction) onDataFrame(data []byte, metaFrame *frame.MetaFrame) {
 			}
 		}()
 	} else if s.pfn != nil {
-		s.client.Logger().Debugf("%spipe fn receive: data[%d]=%# x", streamFunctionLogPrefix, len(data), data)
+		s.client.Logger().Debugf("%spipe function receive: data[%d]=%# x", streamFunctionLogPrefix, len(data), data)
 		s.pIn <- data
 	} else {
 		s.client.Logger().Warnf("%sStreamFunction is nil", streamFunctionLogPrefix)

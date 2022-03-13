@@ -24,9 +24,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
+	svcsvr "github.com/bhojpur/service/pkg/engine"
 	rx "github.com/bhojpur/service/pkg/engine/stream"
+	utils "github.com/bhojpur/service/pkg/utils"
 )
 
 // NoiseData represents the structure of data
@@ -46,6 +49,7 @@ var echo = func(_ context.Context, i interface{}) (interface{}, error) {
 
 // Handler will handle data in Reactive Stream way
 func Handler(rxstream rx.Stream) rx.Stream {
+	log.Println("Reactive Stream handler is running...")
 	stream := rxstream.
 		Unmarshal(json.Unmarshal, func() interface{} { return &NoiseData{} }).
 		Debounce(50).

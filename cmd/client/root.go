@@ -64,7 +64,7 @@ func init() {
 	setVersion()
 
 	// overwrite the shorthand of version flag to V.
-	rootCmd.Flags().BoolP("version", "v", false, "version for Bhojpur Service")
+	rootCmd.Flags().BoolP("version", "v", false, "version for Bhojpur Service utility")
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,

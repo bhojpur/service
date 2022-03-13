@@ -56,7 +56,7 @@ func (s *JsServerless) Init(opts *serverless.Options) error {
 		return fmt.Errorf("the file %s doesn't exist", s.opts.Filename)
 	}
 
-	// generate source code
+	// generate serverless source code
 	source := utils.GetBinContents(s.opts.Filename)
 	if len(source) < 1 {
 		return fmt.Errorf(`"%s" content is empty`, s.opts.Filename)
@@ -128,7 +128,7 @@ func (s *JsServerless) Init(opts *serverless.Options) error {
 	return nil
 }
 
-// Build compiles the serverless to executable
+// Build compiles the serverless stream function to executable
 func (s *JsServerless) Build(clean bool) error {
 	// check if the file exists
 	appPath := s.source
@@ -202,12 +202,12 @@ func (s *JsServerless) Build(clean bool) error {
 	return nil
 }
 
-// Run compiles and runs the serverless
+// Run compiles and runs the serverless stream function
 func (s *JsServerless) Run(verbose bool) error {
-	utils.InfoStatusEvent(os.Stdout, "Run: %s", s.target)
+	utils.InfoStatusEvent(os.Stdout, "Run Javascript serverless: %s", s.target)
 	cmd := exec.Command(s.target)
 	if verbose {
-		cmd.Env = []string{"BHOJPUR_LOG_LEVEL=debug"}
+		cmd.Env = []string{"BHOJPUR_SERVICE_LOG_LEVEL=debug"}
 	}
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

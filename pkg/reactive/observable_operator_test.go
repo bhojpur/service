@@ -2359,7 +2359,7 @@ func Test_Observable_WindowWithTimeOrCount(t *testing.T) {
 	Assert(ctx, t, (<-observe).V.(Observable), HasItems(3))
 }
 
-func Test_Observable_ZipFromObservable(t *testing.T) {
+func Test_Observable_ProcessFromObservable(t *testing.T) {
 	defer goleak.VerifyNone(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -2375,11 +2375,11 @@ func Test_Observable_ZipFromObservable(t *testing.T) {
 		}
 		return 0, nil
 	}
-	zip := obs1.ZipFromIterable(obs2, processor)
-	Assert(ctx, t, zip, HasItems(11, 22, 33))
+	process := obs1.ProcessFromIterable(obs2, processor)
+	Assert(ctx, t, process, HasItems(11, 22, 33))
 }
 
-func Test_Observable_ZipFromObservable_DifferentLength1(t *testing.T) {
+func Test_Observable_ProcessFromObservable_DifferentLength1(t *testing.T) {
 	defer goleak.VerifyNone(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -2395,11 +2395,11 @@ func Test_Observable_ZipFromObservable_DifferentLength1(t *testing.T) {
 		}
 		return 0, nil
 	}
-	zip := obs1.ZipFromIterable(obs2, processor)
-	Assert(ctx, t, zip, HasItems(11, 22))
+	process := obs1.ProcessFromIterable(obs2, processor)
+	Assert(ctx, t, process, HasItems(11, 22))
 }
 
-func Test_Observable_ZipFromObservable_DifferentLength2(t *testing.T) {
+func Test_Observable_ProcessFromObservable_DifferentLength2(t *testing.T) {
 	defer goleak.VerifyNone(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -2415,6 +2415,6 @@ func Test_Observable_ZipFromObservable_DifferentLength2(t *testing.T) {
 		}
 		return 0, nil
 	}
-	zip := obs1.ZipFromIterable(obs2, processor)
-	Assert(ctx, t, zip, HasItems(11, 22))
+	process := obs1.ProcessFromIterable(obs2, processor)
+	Assert(ctx, t, process, HasItems(11, 22))
 }

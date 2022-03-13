@@ -86,8 +86,7 @@ func (c *Client) Init(opts ...ClientOption) error {
 func (c *Client) Connect(ctx context.Context, addr string) error {
 
 	// TODO: refactor this later as a Connection Manager
-	// reconnect
-	// for download processor
+	// reconnect for download processor
 	// If you do not check for errors, the connection will be automatically reconnected
 	go c.reconnect(ctx, addr)
 
@@ -103,14 +102,14 @@ func (c *Client) connect(ctx context.Context, addr string) error {
 	c.addr = addr
 	c.state = ConnStateConnecting
 
-	// create quic connection
+	// create QUIC connection
 	session, err := quic.DialAddrContext(ctx, addr, c.opts.TLSConfig, c.opts.QuicConfig)
 	if err != nil {
 		c.state = ConnStateDisconnected
 		return err
 	}
 
-	// quic stream
+	// QUIC stream
 	stream, err := session.OpenStreamSync(ctx)
 	if err != nil {
 		c.state = ConnStateDisconnected
@@ -272,7 +271,7 @@ func (c *Client) WriteFrame(frm frame.Frame) error {
 		}
 	}
 	if n != len(data) {
-		err := errors.New("[client] Bhojpur Service Client .Write() wroten error")
+		err := errors.New("[client] Bhojpur Service Client .Write() writing error")
 		c.logger.Errorf("%s error:%v", ClientLogPrefix, err)
 		return err
 	}

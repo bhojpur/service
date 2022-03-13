@@ -108,7 +108,7 @@ type Observable interface {
 	WindowWithCount(count int, opts ...Option) Observable
 	WindowWithTime(timespan Duration, opts ...Option) Observable
 	WindowWithTimeOrCount(timespan Duration, count int, opts ...Option) Observable
-	ZipFromIterable(iterable Iterable, processor Func2, opts ...Option) Observable
+	ProcessFromIterable(iterable Iterable, processor Func2, opts ...Option) Observable
 }
 
 // ObservableImpl implements Observable.

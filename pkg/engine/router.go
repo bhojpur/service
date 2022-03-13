@@ -24,7 +24,7 @@ import (
 	"sync"
 
 	"github.com/bhojpur/service/pkg/engine/config"
-	"github.com/bhojpur/service/pkg/engine/core"
+	engine "github.com/bhojpur/service/pkg/engine/core"
 	"github.com/bhojpur/service/pkg/engine/logger"
 )
 
@@ -33,12 +33,12 @@ type router struct {
 	config *config.WorkflowConfig
 }
 
-func newRouter(config *config.WorkflowConfig) core.Router {
+func newRouter(config *config.WorkflowConfig) engine.Router {
 	return &router{config: config}
 }
 
 // router interface
-func (r *router) Route(appID string) core.Route {
+func (r *router) Route(appID string) engine.Route {
 	logger.Debugf("%sapp[%s] workflowconfig is %#v", processorLogPrefix, appID, r.config)
 	return newRoute(r.config)
 }

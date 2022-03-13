@@ -67,7 +67,7 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 
 	serveCmd.Flags().StringVarP(&config, "config", "c", "workflow.yaml", "Workflow config file")
-	serveCmd.Flags().StringVarP(&meshConfURL, "mesh-config", "m", "", "The URL of service mesh config")
+	serveCmd.Flags().StringVarP(&meshConfURL, "mesh-config", "m", "", "The URL of EdgeMesh configuration")
 	// serveCmd.MarkFlagRequired("config")
 }
 

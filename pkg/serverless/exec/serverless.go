@@ -30,12 +30,12 @@ import (
 	"github.com/bhojpur/service/pkg/utils"
 )
 
-// ExecServerless defines executable file implementation of Serverless interface.
+// ExecServerless defines executable file implementation of Serverless stream function interface.
 type ExecServerless struct {
 	target string
 }
 
-// Init initializes the serverless
+// Init initializes the serverless stream function
 func (s *ExecServerless) Init(opts *serverless.Options) error {
 	if !utils.Exists(opts.Filename) {
 		return fmt.Errorf("the file %s doesn't exist", opts.Filename)
@@ -45,17 +45,17 @@ func (s *ExecServerless) Init(opts *serverless.Options) error {
 	return nil
 }
 
-// Build compiles the serverless to executable
+// Build compiles the serverless stream function to executable
 func (s *ExecServerless) Build(clean bool) error {
 	return nil
 }
 
-// Run compiles and runs the serverless
+// Run compiles and runs the serverless stream function
 func (s *ExecServerless) Run(verbose bool) error {
-	utils.InfoStatusEvent(os.Stdout, "Run: %s", s.target)
+	utils.InfoStatusEvent(os.Stdout, "Run Execute serverless: %s", s.target)
 	cmd := exec.Command(s.target)
 	if verbose {
-		cmd.Env = []string{"BHOJPUR_LOG_LEVEL=debug"}
+		cmd.Env = []string{"BHOJPUR_SERVICE_LOG_LEVEL=debug"}
 	}
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

@@ -28,7 +28,7 @@ import (
 )
 
 func TestProcessorRun(t *testing.T) {
-	processor := NewProcessorWithOptions("processor", WithProcessorAddr("localhost:9001"))
+	processor := NewProcessorWithOptions("processor", WithProcessorAddr("localhost:9140"))
 	time.Sleep(time.Second)
 	assert.NotNil(t, processor)
 	err := processor.Close()

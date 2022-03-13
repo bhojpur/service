@@ -2975,9 +2975,9 @@ func (o *ObservableImpl) WindowWithTimeOrCount(timespan Duration, count int, opt
 	return customObservableOperator(o.parent, f, opts...)
 }
 
-// ZipFromIterable merges the emissions of an Iterable via a specified function
+// ProcessFromIterable merges the emissions of an Iterable via a specified function
 // and emit single items for each combination based on the results of this function.
-func (o *ObservableImpl) ZipFromIterable(iterable Iterable, processor Func2, opts ...Option) Observable {
+func (o *ObservableImpl) ProcessFromIterable(iterable Iterable, processor Func2, opts ...Option) Observable {
 	option := parseOptions(opts...)
 	next := option.buildChannel()
 	ctx := option.buildContext(o.parent)

@@ -33,7 +33,7 @@ func main() {
 	// start
 	err := sfn.Connect()
 	if err != nil {
-		utils.Print("[flow] connect err=%v", err)
+		log.Print("[bhojpur:flow] connect err=%v", err)
 	}
 
 	select {}

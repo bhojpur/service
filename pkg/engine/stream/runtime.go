@@ -28,14 +28,14 @@ import (
 	"github.com/bhojpur/service/pkg/engine/logger"
 )
 
-// Runtime is the Stream Serverless Runtime for Reactive Stream.
+// Runtime is the Reactive Stream serverless runtime engine.
 type Runtime struct {
 	rawBytesChan chan interface{}
 	sfn          svcsvr.StreamFunction
 	stream       Stream
 }
 
-// NewRuntime creates a new Reactive Stream Serverless Runtime.
+// NewRuntime creates a new Reactive Stream serverless runtime engine instance.
 func NewRuntime(sfn svcsvr.StreamFunction) *Runtime {
 	return &Runtime{
 		rawBytesChan: make(chan interface{}),
@@ -43,27 +43,27 @@ func NewRuntime(sfn svcsvr.StreamFunction) *Runtime {
 	}
 }
 
-// RawByteHandler is the Handler for RawBytes.
+// RawByteHandler is the Stream Handler for RawBytes.
 func (r *Runtime) RawByteHandler(req []byte) (byte, []byte) {
 	go func() {
 		r.rawBytesChan <- req
 	}()
 
-	// observe the data from RStream.
+	// observe the data from Reactive Stream.
 	for item := range r.stream.Observe() {
 		if item.Error() {
-			logger.Errorf("[Rx Handler] Handler got an error, err=%v", item.E)
+			logger.Errorf("[Reactive Handler] Handler got an error, err=%v", item.E)
 			continue
 		}
 
 		if item.V == nil {
-			logger.Warnf("[Rx Handler] the returned data is nil.")
+			logger.Warnf("[Reactive Handler] the returned data is nil.")
 			continue
 		}
 
 		res, ok := (item.V).(frame.PayloadFrame)
 		if !ok {
-			logger.Warnf("[Rx Handler] the data is not a frame.PayloadFrame, won't send it to Bhojpur Service-Processor.")
+			logger.Warnf("[Reactive Handler] the data is not a frame.PayloadFrame, won't send it to Bhojpur Service-Processor.")
 			continue
 		}
 
@@ -83,33 +83,33 @@ func (r *Runtime) PipeHandler(in <-chan []byte, out chan<- *frame.PayloadFrame) 
 			r.rawBytesChan <- req
 		case item := <-r.stream.Observe():
 			if item.Error() {
-				logger.Errorf("[rx PipeHandler] Handler got an error, err=%v", item.E)
+				logger.Errorf("[Reactive PipeHandler] Handler got an error, err=%v", item.E)
 				continue
 			}
 
 			if item.V == nil {
-				logger.Warnf("[rx PipeHandler] the returned data is nil.")
+				logger.Warnf("[Reactive PipeHandler] the returned data is nil.")
 				continue
 			}
 
 			res, ok := (item.V).(frame.PayloadFrame)
 			if !ok {
-				logger.Warnf("[rx PipeHandler] the data is not a frame.PayloadFrame, won't send it to Bhojpur Service-Processor.")
+				logger.Warnf("[Reactive PipeHandler] the data is not a frame.PayloadFrame, won't send it to Bhojpur Service-Processor.")
 				continue
 			}
 
-			logger.Infof("[rx PipeHandler] Send data with [tag=%#x] to Bhojpur Service-Processor.", res.Tag)
+			logger.Infof("[Reactive PipeHandler] Send data with [tag=%#x] to Bhojpur Service-Processor.", res.Tag)
 			out <- &res
 		}
 	}
 }
 
-// Pipe the RxHandler with Reactive Stream.
+// Pipe the Reactive Handler with Reactive Stream.
 func (r *Runtime) Pipe(rxHandler func(rxstream Stream) Stream) {
 	fac := NewFactory()
 	// create a Reactive Stream from raw bytes channel.
 	rxstream := fac.FromChannel(context.Background(), r.rawBytesChan)
 
-	// run RxHandler and get a new Reactive Stream.
+	// run Reactive Handler and get a new Reactive Stream.
 	r.stream = rxHandler(rxstream)
 }

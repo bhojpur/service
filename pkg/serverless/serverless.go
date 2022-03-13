@@ -31,26 +31,26 @@ var (
 	drivers   = make(map[string]Serverless)
 )
 
-// Serverless defines the interface for serverless
+// Serverless defines the interface for a serverless Stream Function
 type Serverless interface {
-	// Init initializes the serverless
+	// Init initializes the serverless stream function
 	Init(opts *Options) error
 
-	// Build compiles the serverless to executable
+	// Build compiles the serverless stream function to executable
 	Build(clean bool) error
 
-	// Run compiles and runs the serverless
+	// Run compiles and runs the serverless stream function
 	Run(verbose bool) error
 
 	Executable() bool
 }
 
-// Register will register a serverless to drivers collections safely
+// Register will register a serverless stream function to drivers collections safely
 func Register(s Serverless, exts ...string) {
 	driversMu.Lock()
 	defer driversMu.Unlock()
 	if s == nil {
-		panic("serverless: Register serverless is nil")
+		panic("serverless: Register serverless stream function is nil")
 	}
 	for _, ext := range exts {
 		if _, dup := drivers[ext]; dup {
@@ -60,7 +60,7 @@ func Register(s Serverless, exts ...string) {
 	}
 }
 
-// Create returns a new serverless instance with options.
+// Create returns a new serverless Stream Function instance with options.
 func Create(opts *Options) (Serverless, error) {
 	ext := filepath.Ext(opts.Filename)
 

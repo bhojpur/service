@@ -42,7 +42,7 @@ import (
 	"github.com/bhojpur/service/pkg/utils"
 )
 
-// GolangServerless defines golang implementation of Serverless interface.
+// GolangServerless defines Go implementation of Serverless stream function interface.
 type GolangServerless struct {
 	opts    *serverless.Options
 	source  string
@@ -50,7 +50,7 @@ type GolangServerless struct {
 	tempDir string
 }
 
-// Init initializes the serverless
+// Init initializes the serverless stream function
 func (s *GolangServerless) Init(opts *serverless.Options) error {
 	// now := time.Now()
 	// msg := "Init: serverless function..."
@@ -75,7 +75,7 @@ func (s *GolangServerless) Init(opts *serverless.Options) error {
 		Port: s.opts.Port,
 	}
 
-	// determine: rx stream serverless or raw bytes serverless.
+	// determine: Reactive Stream serverless or raw bytes serverless function.
 	isRx := strings.Contains(string(source), "rx.Stream")
 	mainFuncTmpl := ""
 	if isRx {
@@ -214,12 +214,12 @@ func (s *GolangServerless) Build(clean bool) error {
 	return nil
 }
 
-// Run compiles and runs the serverless
+// Run compiles and runs the serverless stream function
 func (s *GolangServerless) Run(verbose bool) error {
-	utils.InfoStatusEvent(os.Stdout, "Run: %s", s.target)
+	utils.InfoStatusEvent(os.Stdout, "Run Go serverless: %s", s.target)
 	cmd := exec.Command(s.target)
 	if verbose {
-		cmd.Env = []string{"BHOJPUR_LOG_LEVEL=debug"}
+		cmd.Env = []string{"BHOJPUR_SERVICE_LOG_LEVEL=debug"}
 	}
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

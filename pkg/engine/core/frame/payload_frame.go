@@ -58,13 +58,14 @@ func (m *PayloadFrame) Encode() []byte {
 
 // DecodeToPayloadFrame decodes Bhojpur Service encoded bytes to PayloadFrame
 func DecodeToPayloadFrame(buf []byte) (*PayloadFrame, error) {
-	//nodeBlock := codec.NodePacket{}
 	nodeBlock, _, err := codec.DecodeNodePacket(buf)
 	if err != nil {
 		return nil, err
 	}
 
 	payload := &PayloadFrame{}
+	payload.Tag = nodeBlock.SeqID()
+	payload.Carriage = nodeBlock.GetValBuf()
 	for _, v := range nodeBlock.PrimitivePackets {
 		payload.Tag = v.SeqID()
 		payload.Carriage = v.ToBytes()

@@ -28,6 +28,7 @@ import (
 )
 
 func parsePayload(b []byte) (endPos int, ifNodePacket bool, np *NodePacket, pp *PrimitivePacket, err error) {
+	// fmt.Println("parsePayload", hex.Dump(b))
 	if len(b) == 0 {
 		return 0, false, nil, nil, errors.New("parsePacket params can not be nil")
 	}
@@ -45,7 +46,7 @@ func parsePayload(b []byte) (endPos int, ifNodePacket bool, np *NodePacket, pp *
 
 // DecodeNodePacket parse out whole buffer to a NodePacket
 func DecodeNodePacket(buf []byte) (pct *NodePacket, endPos int, err error) {
-	// fmt.Println(hex.Dump(buf))
+	// fmt.Println("DecodeNodePacket", hex.Dump(buf))
 	pct = &NodePacket{}
 
 	if len(buf) == 0 {
@@ -89,7 +90,8 @@ func DecodeNodePacket(buf []byte) (pct *NodePacket, endPos int, err error) {
 		_p, isNode, np, pp, err := parsePayload(buf[pos:endPos])
 		pos += _p
 		if err != nil {
-			return nil, 0, err
+			break
+			//return nil, 0, err
 		}
 		if isNode {
 			nodeArr = append(nodeArr, *np)

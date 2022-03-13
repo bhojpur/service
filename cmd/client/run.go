@@ -38,8 +38,8 @@ const (
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "Run a Bhojpur Service Stream Function",
-	Long:  "Run a Bhojpur Service Stream Function",
+	Short: "Run a serverless Bhojpur Service stream function",
+	Long:  "Run a serverless Bhojpur Service stream function after compilation",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			opts.Filename = args[0]
@@ -48,13 +48,13 @@ var runCmd = &cobra.Command{
 		// sigCh := make(chan os.Signal, 1)
 		// signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 		// Serverless
-		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service Stream Function file: %v", opts.Filename)
+		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service stream function filename: %v", opts.Filename)
 		if !utils.IsExec(opts.Filename) && opts.Name == "" {
-			utils.FailureStatusEvent(os.Stdout, "Bhojpur Service Stream Function's Name is empty, please set name used by `-n` flag")
+			utils.FailureStatusEvent(os.Stdout, "Bhojpur Service stream function's Name is empty, please set name used by `-n` flag")
 			return
 		}
 		// resolve serverless
-		utils.PendingStatusEvent(os.Stdout, "Create Bhojpur Service Stream Function instance...")
+		utils.PendingStatusEvent(os.Stdout, "Create Bhojpur Service stream function instance...")
 		if err := parseURL(url, &opts); err != nil {
 			utils.FailureStatusEvent(os.Stdout, err.Error())
 			return
@@ -66,28 +66,28 @@ var runCmd = &cobra.Command{
 		}
 		if !s.Executable() {
 			utils.InfoStatusEvent(os.Stdout,
-				"Starting the Bhojpur Service Stream Function instance with Name: %s. Host: %s. Port: %d.",
+				"Starting the Bhojpur Service stream function instance with Name: %s. Host: %s. Port: %d.",
 				opts.Name,
 				opts.Host,
 				opts.Port,
 			)
 			// build
-			utils.PendingStatusEvent(os.Stdout, "Bhojpur Service Stream Function building...")
+			utils.PendingStatusEvent(os.Stdout, "Bhojpur Service stream function building...")
 			if err := s.Build(true); err != nil {
 				utils.FailureStatusEvent(os.Stdout, err.Error())
 				return
 			}
-			utils.SuccessStatusEvent(os.Stdout, "Success! Bhojpur Service Stream Function build.")
+			utils.SuccessStatusEvent(os.Stdout, "Success! Bhojpur Service stream function build.")
 		} else { // executable
 			utils.InfoStatusEvent(os.Stdout,
-				"Starting the Bhojpur Service Stream Function instance with executable file: %s. Host: %s. Port: %d.",
+				"Starting the Bhojpur Service stream function instance with executable file: %s. Host: %s. Port: %d.",
 				opts.Filename,
 				opts.Host,
 				opts.Port,
 			)
 		}
 		// run
-		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service Stream Function is running...")
+		utils.InfoStatusEvent(os.Stdout, "Bhojpur Service stream function is running...")
 		if err := s.Run(verbose); err != nil {
 			utils.FailureStatusEvent(os.Stdout, err.Error())
 			return
@@ -95,16 +95,16 @@ var runCmd = &cobra.Command{
 		// Exit
 		// <-sigCh
 		// utils.WarningStatusEvent(os.Stdout, "Terminated signal received: shutting down")
-		// utils.InfoStatusEvent(os.Stdout, "Exited Bhojpur Service Stream Function instance.")
+		// utils.InfoStatusEvent(os.Stdout, "Exited Bhojpur Service stream function instance.")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
 
-	runCmd.Flags().StringVarP(&opts.Filename, "file-name", "f", "app.go", "Stream function file")
+	runCmd.Flags().StringVarP(&opts.Filename, "file-name", "f", "app.go", "Bhojpur Service stream function filename")
 	// runCmd.Flags().StringVarP(&opts.Lang, "lang", "l", "go", "source language")
-	runCmd.Flags().StringVarP(&url, "url", "u", "localhost:9000", "Bhojpur Service-Processor endpoint addr")
+	runCmd.Flags().StringVarP(&url, "url", "u", "localhost:9140", "Bhojpur Service-Processor endpoint addrress")
 	runCmd.Flags().StringVarP(&opts.Name, "name", "n", "", "Bhojpur Service stream function name. It should match the specific service name in Bhojpur Service-Processor config (workflow.yaml)")
 	runCmd.Flags().StringVarP(&opts.ModFile, "modfile", "m", "", "custom go.mod")
 	// runCmd.MarkFlagRequired("name")

@@ -26,7 +26,7 @@ import (
 	"github.com/bhojpur/service/pkg/reactive"
 )
 
-// Factory creates the rx.Stream from several sources.
+// Factory creates the Reactive Stream from several sources.
 type Factory interface {
 	// FromChannel creates a new Stream from a channel.
 	FromChannel(ctx context.Context, channel chan interface{}) Stream
@@ -38,12 +38,12 @@ type Factory interface {
 type factoryImpl struct {
 }
 
-// NewFactory creates a new Rx factory.
+// NewFactory creates a new Reactive Factory.
 func NewFactory() Factory {
 	return &factoryImpl{}
 }
 
-// FromChannel creates a new Stream from a channel.
+// FromChannel creates a new Reactive Stream from a channel.
 func (fac *factoryImpl) FromChannel(ctx context.Context, channel chan interface{}) Stream {
 	f := func(ctx context.Context, next chan reactive.Item) {
 		defer close(next)
@@ -69,7 +69,7 @@ func (fac *factoryImpl) FromChannel(ctx context.Context, channel chan interface{
 	return CreateObservable(ctx, f)
 }
 
-// FromItems creates a new Stream from items.
+// FromItems creates a new Reactive Stream from items.
 func (fac *factoryImpl) FromItems(ctx context.Context, items []interface{}) Stream {
 	next := make(chan reactive.Item)
 	go func() {

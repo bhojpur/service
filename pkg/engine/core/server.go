@@ -39,7 +39,7 @@ import (
 )
 
 const (
-	DefaultListenAddr = "0.0.0.0:9000"
+	DefaultListenAddr = "0.0.0.0:9140"
 )
 
 type ServerOption func(*ServerOptions)
@@ -48,7 +48,7 @@ type ServerOption func(*ServerOptions)
 // f frame.Frame) error
 type FrameHandler func(c *Context) error
 
-// Server is the underlining server of Processor
+// Server is the underlining server of Bhojpur Service-Processor
 type Server struct {
 	name string
 	// stream          quic.Stream
@@ -63,7 +63,7 @@ type Server struct {
 	afterHandlers      []FrameHandler
 }
 
-// NewServer create a Server instance.
+// NewServer create a Bhojpur Service server instance.
 func NewServer(name string, opts ...ServerOption) *Server {
 	s := &Server{
 		name:        name,
@@ -102,7 +102,7 @@ func (s *Server) ListenAndServe(ctx context.Context, addr string) error {
 	return s.Serve(ctx, conn)
 }
 
-// Serve the server with a net.PacketConn.
+// Serve the Bhojpur Service server with a net.PacketConn.
 func (s *Server) Serve(ctx context.Context, conn net.PacketConn) error {
 	listener := newListener()
 	// listen the address
@@ -112,7 +112,7 @@ func (s *Server) Serve(ctx context.Context, conn net.PacketConn) error {
 		return err
 	}
 	defer listener.Close()
-	logger.Printf("%s✅ [%s] Listening on: %s, MODE: %s, QUIC: %v, AUTH: %s", ServerLogPrefix, s.name, listener.Addr(), mode(), listener.Versions(), s.authNames())
+	logger.Printf("%s✅ [%s] Bhojpur Service listening on: %s, MODE: %s, QUIC: %v, AUTH: %s", ServerLogPrefix, s.name, listener.Addr(), mode(), listener.Versions(), s.authNames())
 
 	s.state = ConnStateConnected
 	for {
@@ -127,7 +127,7 @@ func (s *Server) Serve(ctx context.Context, conn net.PacketConn) error {
 		}
 
 		connID := GetConnID(session)
-		logger.Infof("%s❤️1/ new connection: %s", ServerLogPrefix, connID)
+		logger.Infof("%s❤️1/ new Client connection: %s", ServerLogPrefix, connID)
 
 		go func(ctx context.Context, sess quic.Session) {
 			for {
@@ -142,13 +142,13 @@ func (s *Server) Serve(ctx context.Context, conn net.PacketConn) error {
 						s.connector.Remove(connID)
 						// store
 						// when remove store by appID? let me think...
-						logger.Printf("%s💔 [%s::%s](%s) close the connection", ServerLogPrefix, app.ID(), app.Name(), connID)
+						logger.Printf("%s💔 [%s::%s](%s) close the Client connection", ServerLogPrefix, app.ID(), app.Name(), connID)
 					} else {
 						logger.Errorf("%s❤️3/ [unknown](%s) on stream %v", ServerLogPrefix, connID, err)
 					}
 					break
 				}
-				// TODO: 确实执行了吗？
+				// TODO: ？
 				defer stream.Close()
 
 				logger.Infof("%s❤️4/ [stream:%d] created, connID=%s", ServerLogPrefix, stream.StreamID(), connID)
@@ -265,7 +265,7 @@ func (s *Server) mainFrameHandler(c *Context) error {
 	// 	s.handlePingFrame(mainStream, session, f.(*frame.PingFrame))
 	case frame.TagOfDataFrame:
 		if err := s.handleDataFrame(c); err != nil {
-			c.CloseWithError(0xCC, "处理DataFrame出错")
+			c.CloseWithError(0xCC, "DataFrame")
 		} else {
 			s.dispatchToDownstreams(c.Frame.(*frame.DataFrame))
 		}
@@ -311,13 +311,13 @@ func (s *Server) handleHandshakeFrame(c *Context) error {
 		s.connector.Add(connID, stream)
 		s.connector.LinkApp(connID, appID, name, nil)
 	case ClientTypeStreamFunction:
-		// when sfn connect, it will provide its name to the server. server will check if this client
-		// has permission connected to.
+		// when Stream Function connects, it will provide its name to the server. The server will
+		// check, if this client has required permissions to connect with.
 		if !route.Exists(name) {
 			// unexpected client connected, close the connection
 			s.connector.Remove(connID)
-			// SFN: stream function
-			err := fmt.Errorf("handshake router validation faild, illegal SFN[%s]", f.Name)
+			// Bhojpur Service: stream function
+			err := fmt.Errorf("handshake router validation failed, illegal Stream Function[%s]", f.Name)
 			c.CloseWithError(0xCC, err.Error())
 			// break
 			return err
@@ -334,7 +334,7 @@ func (s *Server) handleHandshakeFrame(c *Context) error {
 		s.connector.Remove(connID)
 		logger.Errorf("%sClientType=%# x, ilegal!", ServerLogPrefix, f.ClientType)
 		c.CloseWithError(0xCD, "Unknown ClientType, illegal!")
-		return errors.New("core.server: Unknown ClientType, illegal")
+		return errors.New("engine.server: Unknown ClientType, illegal")
 	}
 	logger.Printf("%s❤️  <%s> [%s::%s](%s) is connected!", ServerLogPrefix, clientType, appID, name, connID)
 	return nil
@@ -390,7 +390,7 @@ func (s *Server) handleDataFrame(c *Context) error {
 	return nil
 }
 
-// StatsFunctions returns the sfn stats of server.
+// StatsFunctions returns the Stream Function stats of server.
 // func (s *Server) StatsFunctions() map[string][]*quic.Stream {
 func (s *Server) StatsFunctions() map[string]io.ReadWriteCloser {
 	return s.connector.GetSnapshot()
@@ -406,7 +406,7 @@ func (s *Server) Downstreams() map[string]*Client {
 	return s.downstreams
 }
 
-// AddWorkflow register sfn to this server.
+// AddWorkflow register Stream Function to this server.
 // func (s *Server) AddWorkflow(wfs ...Workflow) error {
 // 	for _, wf := range wfs {
 // 		s.router.Add(wf.Seq, wf.Name)

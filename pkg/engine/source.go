@@ -23,7 +23,7 @@ package engine
 import (
 	"context"
 
-	"github.com/bhojpur/service/pkg/engine/core"
+	engine "github.com/bhojpur/service/pkg/engine/core"
 	"github.com/bhojpur/service/pkg/engine/core/frame"
 )
 
@@ -49,7 +49,7 @@ type Source interface {
 type dataSource struct {
 	name              string
 	processorEndpoint string
-	client            *core.Client
+	client            *engine.Client
 	tag               uint8
 }
 
@@ -58,7 +58,7 @@ var _ Source = &dataSource{}
 // NewSource create a Bhojpur Service Data-Source
 func NewSource(name string, opts ...Option) Source {
 	options := NewOptions(opts...)
-	client := core.NewClient(name, core.ClientTypeSource, options.ClientOptions...)
+	client := engine.NewClient(name, engine.ClientTypeSource, options.ClientOptions...)
 
 	return &dataSource{
 		name:              name,

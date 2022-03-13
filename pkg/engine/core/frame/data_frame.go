@@ -93,7 +93,6 @@ func (d *DataFrame) Encode() []byte {
 
 // DecodeToDataFrame decode Bhojpur Service encoded bytes to `DataFrame`
 func DecodeToDataFrame(buf []byte) (*DataFrame, error) {
-	//packet := codec.NodePacket{}
 	packet, _, err := codec.DecodeNodePacket(buf)
 	if err != nil {
 		return nil, err
@@ -101,14 +100,16 @@ func DecodeToDataFrame(buf []byte) (*DataFrame, error) {
 
 	data := &DataFrame{}
 
-	metaBlock := packet.NodePackets[int(byte(TagOfMetaFrame))]
+	//metaBlock := packet.NodePackets[byte(TagOfMetaFrame)]
+	metaBlock := packet.NodePackets[0]
 	meta, err := DecodeToMetaFrame(metaBlock.GetValBuf())
 	if err != nil {
 		return nil, err
 	}
 	data.metaFrame = meta
 
-	payloadBlock := packet.NodePackets[int(byte(TagOfPayloadFrame))]
+	//payloadBlock := packet.NodePackets[int(byte(TagOfPayloadFrame))]
+	payloadBlock := packet.NodePackets[1]
 	payload, err := DecodeToPayloadFrame(payloadBlock.GetValBuf())
 	if err != nil {
 		return nil, err

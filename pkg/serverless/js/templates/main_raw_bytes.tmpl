@@ -26,13 +26,14 @@ import (
 
 	"github.com/dop251/goja"
 	svcsvr "github.com/bhojpur/service/pkg/engine"
+
 )
 
 // Serverless main function
 func main() {
 	// create a javascript vm
 	vm := goja.New()
-	vm.Set("log", utils.Default())
+	vm.Set("log", log.Default())
 	vm.Set("arrayBufferToString", func(buf goja.ArrayBuffer) string { return string(buf.Bytes()) })
 	vm.Set("stringToArrayBuffer", func(v string) goja.ArrayBuffer {
 		return vm.NewArrayBuffer([]byte(v))
@@ -40,7 +41,7 @@ func main() {
 	// prg, err := complieJS(vm, string(source))
 	prg, err := complieJS(vm, source)
 	if err != nil {
-		utils.Printf("complie js err: %v\n", err)
+		log.Printf("complie js err: %v\n", err)
 		return
 	}
 
@@ -57,7 +58,7 @@ func main() {
 	// start
 	err = sfn.Connect()
 	if err != nil {
-		utils.Printf("[{{.Name}}] connect err=%v\n", err)
+		log.Printf("[{{.Name}}] connect err=%v\n", err)
 	}
 
 	select {}
@@ -67,7 +68,7 @@ func wrappedHandler(vm *goja.Runtime, prg *goja.Program) func(data []byte) (byte
 	return func(data []byte) (byte, []byte) {
 		id, payload, err := jsHandler(vm, prg, data)
 		if err != nil {
-			utils.Printf("app err: %v", err)
+			log.Printf("app err: %v", err)
 			return 0x0, nil
 		}
 		return id, payload
@@ -92,12 +93,12 @@ func getObserveDataTags(vm *goja.Runtime, prg *goja.Program) (dataTags []byte) {
 	var dataTagsFn func() []byte
 	jsFn := vm.Get("dataTags")
 	if jsFn == nil {
-		utils.Println("`dataTags` function is not found")
+		log.Println("`dataTags` function is not found")
 		return
 	}
 	err := vm.ExportTo(jsFn, &dataTagsFn)
 	if err != nil {
-		utils.Println(err)
+		log.Println(err)
 	}
 	dataTags = dataTagsFn()
 	return
