@@ -78,8 +78,8 @@ require (
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/mrz1836/postmark v1.2.9
 	github.com/nacos-group/nacos-sdk-go v1.1.0
-	github.com/nats-io/nats-server/v2 v2.7.3
-	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
+	github.com/nats-io/nats-server/v2 v2.8.1
+	github.com/nats-io/nats.go v1.14.0
 	github.com/nats-io/nkeys v0.3.0
 	github.com/nats-io/stan.go v0.10.2
 	github.com/open-policy-agent/opa v0.37.2
@@ -102,7 +102,7 @@ require (
 	go.mongodb.org/mongo-driver v1.8.3
 	go.uber.org/goleak v1.1.12
 	go.uber.org/zap v1.21.0
-	golang.org/x/crypto v0.0.0-20220313003712-b769efc7c000
+	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
@@ -267,7 +267,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/moul/http2curl v1.0.0 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
-	github.com/nats-io/jwt/v2 v2.2.1-0.20220113022732-58e87895b296 // indirect
+	github.com/nats-io/jwt/v2 v2.2.1-0.20220330180145-442af02fd36a // indirect
 	github.com/nats-io/nats-streaming-server v0.24.2 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
