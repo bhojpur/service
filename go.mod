@@ -76,7 +76,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.3
-	github.com/mrz1836/postmark v1.2.9
+	github.com/mrz1836/postmark v1.2.10
 	github.com/nacos-group/nacos-sdk-go v1.1.0
 	github.com/nats-io/nats-server/v2 v2.7.3
 	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
