@@ -37,7 +37,7 @@ require (
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/aws/aws-sdk-go v1.43.6
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
-	github.com/camunda-cloud/zeebe/clients/go v1.3.4
+	github.com/camunda-cloud/zeebe/clients/go v1.3.8
 	github.com/cenkalti/backoff/v4 v4.1.2
 	github.com/cinience/go_rocketmq v0.0.2
 	github.com/coreos/go-oidc v2.2.1+incompatible
