@@ -97,7 +97,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/supplyon/gremcos v0.1.20
 	github.com/teivah/onecontext v1.3.0
-	github.com/valyala/fasthttp v1.33.0
+	github.com/valyala/fasthttp v1.39.0
 	github.com/vmware/vmware-go-kcl v1.5.0
 	go.mongodb.org/mongo-driver v1.8.3
 	go.uber.org/goleak v1.1.12
