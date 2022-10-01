@@ -33,7 +33,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.1+incompatible
 	github.com/aliyun/aliyun-tablestore-go-sdk v1.7.1
 	github.com/apache/pulsar-client-go v0.8.0
-	github.com/apache/rocketmq-client-go/v2 v2.1.0
+	github.com/apache/rocketmq-client-go/v2 v2.1.1
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/aws/aws-sdk-go v1.43.6
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
@@ -286,6 +286,7 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rs/zerolog v1.25.0 // indirect
 	github.com/russross/blackfriday v1.6.0 // indirect
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/segmentio/fasthash v1.0.3 // indirect
 	github.com/sendgrid/rest v2.6.8+incompatible // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
@@ -296,6 +297,7 @@ require (
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stathat/consistent v1.0.0 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/tidwall/gjson v1.14.0 // indirect
@@ -325,7 +327,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
@@ -349,7 +351,6 @@ require (
 	nhooyr.io/websocket v1.8.7 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.0.2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
-	stathat.com/c/consistent v1.0.0 // indirect
 )
 
 replace k8s.io/api => k8s.io/api v0.20.4
