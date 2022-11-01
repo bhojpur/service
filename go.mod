@@ -69,7 +69,7 @@ require (
 	github.com/influxdata/influxdb-client-go v1.4.0
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/json-iterator/go v1.1.12
-	github.com/lib/pq v1.10.4
+	github.com/lib/pq v1.10.7
 	github.com/lucas-clemente/quic-go v0.25.0
 	github.com/machinebox/graphql v0.2.2
 	github.com/matoous/go-nanoid/v2 v2.0.0
