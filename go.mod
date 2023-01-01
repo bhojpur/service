@@ -79,9 +79,9 @@ require (
 	github.com/mrz1836/postmark v1.2.9
 	github.com/nacos-group/nacos-sdk-go v1.1.0
 	github.com/nats-io/nats-server/v2 v2.7.3
-	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
+	github.com/nats-io/nats.go v1.16.0
 	github.com/nats-io/nkeys v0.3.0
-	github.com/nats-io/stan.go v0.10.2
+	github.com/nats-io/stan.go v0.10.3
 	github.com/open-policy-agent/opa v0.37.2
 	github.com/oracle/oci-go-sdk/v54 v54.0.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -102,7 +102,7 @@ require (
 	go.mongodb.org/mongo-driver v1.8.3
 	go.uber.org/goleak v1.1.12
 	go.uber.org/zap v1.21.0
-	golang.org/x/crypto v0.0.0-20220313003712-b769efc7c000
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
