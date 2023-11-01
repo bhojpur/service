@@ -65,7 +65,7 @@ require (
 	github.com/hashicorp/consul/api v1.12.0
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/hashicorp/golang-lru v0.5.4
-	github.com/hazelcast/hazelcast-go-client v1.1.1
+	github.com/hazelcast/hazelcast-go-client v1.4.1
 	github.com/influxdata/influxdb-client-go v1.4.0
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/json-iterator/go v1.1.12
@@ -325,7 +325,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
