@@ -95,7 +95,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
 	github.com/stretchr/testify v1.7.0
-	github.com/supplyon/gremcos v0.1.20
+	github.com/supplyon/gremcos v0.1.40
 	github.com/teivah/onecontext v1.3.0
 	github.com/valyala/fasthttp v1.33.0
 	github.com/vmware/vmware-go-kcl v1.5.0
