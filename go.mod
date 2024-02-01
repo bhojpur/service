@@ -56,7 +56,7 @@ require (
 	github.com/fhmq/hmq v0.0.0-20220130011429-94ff8e84055d
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/gocql/gocql v0.0.0-20220224095938-0eacd3183625
+	github.com/gocql/gocql v1.6.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/mock v1.6.0
