@@ -93,7 +93,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
-	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
+	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.7.0
 	github.com/supplyon/gremcos v0.1.20
 	github.com/teivah/onecontext v1.3.0
